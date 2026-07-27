@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบติดตามค่าใช้จ่าย</title>
+    <!-- Include html2canvas for exporting element to image -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --border-color: #e5e7eb;
+            --success-bg: #d1fae5;
+            --success-text: #065f46;
+            --danger-color: #ef4444;
+            --table-header-bg: #f8fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        h1 {
+            text-align: center;
+            color: #1e293b;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        /* Tabs styling */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 20px;
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            background: transparent;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .summary-box {
+            display: flex;
+            justify-content: space-between;
+            background: #f1f5f9;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .summary-item {
+            font-size: 16px;
+        }
+        .summary-item span {
+            color: #1e293b;
+            font-size: 18px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button.btn-danger {
+            background-color: var(--danger-color);
+        }
+        button.btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        button.btn-success {
+            background-color: #10b981;
+        }
+        button.btn-success:hover {
+            background-color: #059669;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: var(--table-header-bg);
+            font-weight: 600;
+            color: #475569;
+        }
+
+        td.text-right, th.text-right {
+            text-align: right;
+        }
+
+        td.text-center, th.text-center {
+            text-align: center;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 6px 8px;
+            box-sizing: border-box;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: #ffffff;
+        }
+
+        input[type="checkbox"] {
+            transform: scale(1.3);
+            cursor: pointer;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            background-color: var(--success-bg);
+            color: var(--success-text);
+            font-weight: 500;
+        }
+
+        .add-row-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px dashed var(--border-color);
+            flex-wrap: wrap;
+        }
+
+        .add-row-form input {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-top: 24px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary-color);
+            padding-left: 8px;
+        }
+
+        #export-area {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>ระบบติดตามค่าใช้จ่าย</h1>
+
+    <!-- Tabs Navigation -->
+    <div class="tabs">
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab('main')">ค่าใช้จ่ายหลัก</button>
+            <button class="tab-btn" onclick="switchTab('billing')">รายการเรียกเก็บ</button>
+        </div>
+        <div id="export-btn-container" style="display: none;">
+            <button class="btn-success" onclick="exportBillingToJpg()">📷 Export เป็น JPG</button>
+        </div>
+    </div>
+
+    <!-- Tab 1: Main Expense -->
+    <div id="tab-main" class="tab-content active">
+        <div class="summary-box">
+            <div class="summary-item">ยอดรวมทั้งหมด (สุทธิ): <span id="net-total-amount">0.00</span> บาท</div>
+        </div>
+
+        <div class="controls">
+            <button onclick="resetAllStatus()">รีเซ็ตสถานะทั้งหมด (เดือนใหม่)</button>
+            <button class="btn-danger" onclick="clearLocalStorage()">ล้างข้อมูลทั้งหมด</button>
+        </div>
+
+        <table id="expense-table">
+            <thead>
+                <tr>
+                    <th style="width: 28%;">รายการ</th>
+                    <th style="width: 14%;" class="text-right">ราคา (บาท)</th>
+                    <th style="width: 14%;" class="text-center">ผ่อนจ่าย (งวด)</th>
+                    <th style="width: 12%;" class="text-center">เรียกเก็บ</th>
+                    <th style="width: 10%;" class="text-center">จ่ายแล้ว</th>
+                    <th style="width: 22%;">ข้อมูล</th>
+                </tr>
+            </thead>
+            <tbody id="expense-tbody">
+                <!-- Data populated by JS -->
+            </tbody>
+        </table>
+
+        <div class="add-row-form">
+            <input type="text" id="new-name" placeholder="ชื่อรายการใหม่...">
+            <input type="number" id="new-price" placeholder="ราคา" style="max-width: 110px;">
+            <input type="number" id="new-total-installments" placeholder="จำนวนงวด (ถ้ามี)" style="max-width: 140px;">
+            <label style="display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;">
+                <input type="checkbox" id="new-is-billing"> รายการเรียกเก็บ
+            </label>
+            <button onclick="addNewItem()">เพิ่มรายการ</button>
+        </div>
+    </div>
+
+    <!-- Tab 2: Billing / Split Expense -->
+    <div id="tab-billing" class="tab-content">
+        <div id="export-area">
+            <div class="summary-box">
+                <div class="summary-item">ยอดรวมรายการเรียกเก็บทั้งหมด: <span id="billing-total-amount">0.00</span> บาท</div>
+            </div>
+            
+            <!-- Category 1: Main Billing Items -->
+            <div class="section-title">1. รายการเรียกเก็บ</div>
+            <p style="font-size: 13px; color: #64748b; margin-top: 0;">ดึงมาจากรายการที่ติ๊ก "รายการเรียกเก็บ" ในแท็บค่าใช้จ่ายหลัก (หารสองอัตโนมัติ), สามารถเพิ่มรายการเองได้โดยตรง, และรวมยอดจากหมวด "อื่นๆ" ด้านล่าง</p>
+
+            <table id="billing-main-table">
+                <thead>
+                    <tr>
+                        <th style="width: 45%;">รายการ</th>
+                        <th style="width: 20%;" class="text-center">ผ่อนจ่าย (งวด)</th>
+                        <th style="width: 35%;" class="text-right" style="color: #2563eb;">ยอดเรียกเก็บ</th>
+                    </tr>
+                </thead>
+                <tbody id="billing-main-tbody">
+                    <!-- Populated by JS -->
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2" style="font-weight: bold;">รวม</td>
+                        <td id="billing-main-sum-footer" class="text-right" style="font-weight: bold; color: #2563eb;">0.00</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <!-- Form for adding main billing item placed inside export area -->
+            <div class="add-row-form" id="form-manual-main">
+                <input type="text" id="manual-main-name" placeholder="ชื่อรายการเรียกเก็บ...">
+                <input type="number" id="manual-main-price" placeholder="ยอดเรียกเก็บ" style="max-width: 150px;">
+                <button onclick="addManualMainBillingItem()">เพิ่มรายการเรียกเก็บ</button>
+            </div>
+
+            <!-- Category 2: Other Billing Items -->
+            <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px;" id="title-other-section">
+                <span>2. อื่นๆ (เพิ่มทีหลัง)</span>
+                <button onclick="clearSavedOtherNames()" style="background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 4px 8px; font-size: 12px; border-radius: 4px;">ล้างประวัติคำ</button>
+            </div>
+            <p style="font-size: 13px; color: #64748b; margin-top: 0;" id="desc-other-section">รายการเพิ่มเติมพิเศษ สามารถเพิ่มและลบรายรายการได้</p>
+
+            <table id="billing-other-table">
+                <thead>
+                    <tr>
+                        <th style="width: 65%;">รายการ</th>
+                        <th style="width: 25%;" class="text-right">ยอดเรียกเก็บ</th>
+                        <th style="width: 10%;" class="text-center manage-col">ลบ</th>
+                    </tr>
+                </thead>
+                <tbody id="billing-other-tbody">
+                    <!-- Populated by JS -->
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td style="font-weight: bold;">รวม</td>
+                        <td id="billing-other-sum-footer" class="text-right" style="font-weight: bold;">0.00</td>
+                        <td class="manage-col"></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div class="add-row-form" id="form-other-section">
+                <!-- Using Datalist: Combines Dropdown selection + Type custom value -->
+                <input type="text" id="other-name" list="saved-other-names" placeholder="เลือกจากรายการ หรือพิมพ์กรอกเอง...">
+                <datalist id="saved-other-names">
+                    <!-- Options populated by JS -->
+                </datalist>
+                
+                <input type="number" id="other-price" placeholder="ยอดเรียกเก็บ" style="max-width: 150px;">
+                <button onclick="addOtherBillingItem()">เพิ่มรายการอื่นๆ</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzYaBSXLXMJa9EZM38y4uKy_pwJjtEPX6PjW-5rLPOX6wpuDwhCnwdbZqdpNXyU4vRLhw/exec";
+
+    async function sendToGoogleSheet(payload) {
+        if (!WEB_APP_URL) return;
+        try {
+            await fetch(WEB_APP_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+        } catch (error) {
+            console.error("Google Sheet Sync Error:", error);
+        }
+    }
+
+    const defaultItems = [
+        { name: "ส่วนกลาง", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
+        { name: "fin mobile", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
+        { name: "AIS", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
+        { name: "Netflix", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
+        { name: "Youtube", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
+        { name: "ไฟ", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
+        { name: "น้ำ", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
+        { name: "Drive", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
+        { name: "ให้แม่", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
+        { name: "บัตร", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
+        { name: "กิน", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
+        { name: "Shopee Pay", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
+        { name: "อาหารแมว", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
+        { name: "ทรายแมว", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
+        { name: "Dime", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
+        { name: "จากนิด", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
+        { name: "น้ำกิน", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false }
+    ];
+
+    let items = JSON.parse(localStorage.getItem('expense_items_v35')) || defaultItems;
+    let manualMainBillingItems = JSON.parse(localStorage.getItem('manual_main_billing_v35')) || [];
+    let otherBillingItems = JSON.parse(localStorage.getItem('other_billing_items_v35')) || [];
+    let savedOtherNames = JSON.parse(localStorage.getItem('saved_other_names_v35')) || ["ค่าห้อง", "ค่าปรับ", "ค่าส่วนกลางเพิ่มเติม", "ค่าอินเทอร์เน็ต"];
+
+    function saveToStorage() {
+        localStorage.setItem('expense_items_v35', JSON.stringify(items));
+        localStorage.setItem('manual_main_billing_v35', JSON.stringify(manualMainBillingItems));
+        localStorage.setItem('other_billing_items_v35', JSON.stringify(otherBillingItems));
+        localStorage.setItem('saved_other_names_v35', JSON.stringify(savedOtherNames));
+    }
+
+    function renderSavedOtherNamesList() {
+        const dataList = document.getElementById('saved-other-names');
+        dataList.innerHTML = '';
+        savedOtherNames.forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            dataList.appendChild(option);
+        });
+    }
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+        const exportBtnContainer = document.getElementById('export-btn-container');
+
+        if (tabName === 'main') {
+            document.getElementById('tab-main').classList.add('active');
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            exportBtnContainer.style.display = 'none';
+        } else {
+            document.getElementById('tab-billing').classList.add('active');
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            exportBtnContainer.style.display = 'block';
+        }
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('expense-tbody');
+        const billingMainTbody = document.getElementById('billing-main-tbody');
+        const billingOtherTbody = document.getElementById('billing-other-tbody');
+        
+        tbody.innerHTML = '';
+        billingMainTbody.innerHTML = '';
+        billingOtherTbody.innerHTML = '';
+
+        let totalAmount = 0;
+        let billingMainTotal = 0;
+
+        let totalItemsCount = items.length;
+        let paidItemsCount = 0;
+
+        // 1. Render Main Items
+        items.forEach((item, index) => {
+            const price = parseFloat(item.price) || 0;
+            totalAmount += price;
+
+            let halfPrice = 0;
+            if (item.isBilling) {
+                halfPrice = price / 2;
+                billingMainTotal += halfPrice;
+            }
+
+            if (item.paid) {
+                paidItemsCount++;
+            }
+
+            const tr = document.createElement('tr');
+
+            const tdName = document.createElement('td');
+            tdName.innerHTML = `<input type="text" value="${item.name}" onchange="updateName(${index}, this.value)">`;
+            tr.appendChild(tdName);
+
+            const tdPrice = document.createElement('td');
+            tdPrice.className = 'text-right';
+            tdPrice.innerHTML = `<input type="number" style="text-align: right;" value="${item.price || ''}" placeholder="0.00" onchange="updatePrice(${index}, this.value)">`;
+            tr.appendChild(tdPrice);
+
+            const tdInstConfig = document.createElement('td');
+            tdInstConfig.className = 'text-center';
+            if (item.totalInstallments > 0) {
+                tdInstConfig.innerHTML = `<span style="font-size: 12px;">งวด ${item.currentInstallment || 0}/${item.totalInstallments}</span><br><button style="padding: 2px 4px; font-size: 10px; margin-top: 2px;" onclick="editInstallment(${index})">ตั้งค่า</button>`;
+            } else {
+                tdInstConfig.innerHTML = `<button style="padding: 2px 4px; font-size: 10px;" onclick="setInstallment(${index})">ทำเป็นผ่อน</button>`;
+            }
+            tr.appendChild(tdInstConfig);
+
+            const tdIsBilling = document.createElement('td');
+            tdIsBilling.className = 'text-center';
+            const billingCheckbox = document.createElement('input');
+            billingCheckbox.type = 'checkbox';
+            billingCheckbox.checked = item.isBilling;
+            billingCheckbox.onchange = (e) => toggleBilling(index, e.target.checked);
+            tdIsBilling.appendChild(billingCheckbox);
+            tr.appendChild(tdIsBilling);
+
+            const tdStatus = document.createElement('td');
+            tdStatus.className = 'text-center';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = item.paid;
+            checkbox.onchange = (e) => togglePaid(index, e.target.checked);
+            tdStatus.appendChild(checkbox);
+            tr.appendChild(tdStatus);
+
+            const tdInfo = document.createElement('td');
+            tdInfo.innerHTML = item.info ? `<span class="badge">${item.info}</span>` : `<span style="color: #cbd5e1; font-size: 13px;">-</span>`;
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerHTML = '&times;';
+            deleteBtn.title = 'ลบรายการนี้';
+            deleteBtn.style.cssText = 'float: right; background: transparent; color: #94a3b8; border: none; font-size: 16px; cursor: pointer; padding: 0 4px;';
+            deleteBtn.onclick = () => deleteItem(index);
+            tdInfo.appendChild(deleteBtn);
+
+            tr.appendChild(tdInfo);
+            tbody.appendChild(tr);
+
+            // Render Billing Main Table
+            if (item.isBilling) {
+                const bTr = document.createElement('tr');
+                
+                const bName = document.createElement('td');
+                bName.innerText = item.name;
+                bTr.appendChild(bName);
+
+                const bInst = document.createElement('td');
+                bInst.className = 'text-center';
+                if (item.totalInstallments > 0) {
+                    bInst.innerHTML = `<span style="font-size: 12px;">งวด ${item.currentInstallment || 0}/${item.totalInstallments}</span><br><button style="padding: 2px 4px; font-size: 10px; margin-top: 2px;" onclick="editInstallment(${index})">ตั้งค่า</button>`;
+                } else {
+                    bInst.innerHTML = `<button style="padding: 2px 4px; font-size: 10px;" onclick="setInstallment(${index})">ทำเป็นผ่อน</button>`;
+                }
+                bTr.appendChild(bInst);
+
+                const bHalfPrice = document.createElement('td');
+                bHalfPrice.className = 'text-right';
+                bHalfPrice.style.fontWeight = 'bold';
+                bHalfPrice.style.color = '#2563eb';
+                bHalfPrice.innerText = halfPrice.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                bTr.appendChild(bHalfPrice);
+
+                billingMainTbody.appendChild(bTr);
+            }
+        });
+
+        if (totalItemsCount > 0 && paidItemsCount === totalItemsCount) {
+            setTimeout(() => {
+                items = items.filter(item => !(item.totalInstallments > 0 && item.currentInstallment >= item.totalInstallments));
+                manualMainBillingItems = manualMainBillingItems.filter(mItem => !(mItem.totalInstallments > 0 && mItem.currentInstallment >= mItem.totalInstallments));
+
+                items.forEach(item => {
+                    item.paid = false;
+                    item.info = '';
+                    if (item.totalInstallments > 0 && (item.currentInstallment || 0) < item.totalInstallments) {
+                        item.currentInstallment = (item.currentInstallment || 0) + 1;
+                    }
+                });
+                
+                manualMainBillingItems.forEach(mItem => {
+                    if (mItem.totalInstallments > 0 && (mItem.currentInstallment || 0) < mItem.totalInstallments) {
+                        mItem.currentInstallment = (mItem.currentInstallment || 0) + 1;
+                    }
+                });
+                
+                saveToStorage();
+                renderTable();
+            }, 600);
+        }
+
+        // 2. Render Manually Added Main Billing Items
+        manualMainBillingItems.forEach((manualItem, index) => {
+            const mPrice = parseFloat(manualItem.price) || 0;
+            billingMainTotal += mPrice;
+
+            const mTr = document.createElement('tr');
+
+            const mName = document.createElement('td');
+            mName.innerText = manualItem.name;
+            mTr.appendChild(mName);
+
+            const mInst = document.createElement('td');
+            mInst.className = 'text-center';
+            if (manualItem.totalInstallments > 0) {
+                mInst.innerHTML = `<span style="font-size: 12px;">งวด ${manualItem.currentInstallment || 0}/${manualItem.totalInstallments}</span><br><button style="padding: 2px 4px; font-size: 10px; margin-top: 2px;" onclick="editManualInstallment(${index})">ตั้งค่า</button>`;
+            } else {
+                mInst.innerHTML = `<button style="padding: 2px 4px; font-size: 10px;" onclick="setManualInstallment(${index})">ทำเป็นผ่อน</button>`;
+            }
+            mTr.appendChild(mInst);
+
+            const mPriceTd = document.createElement('td');
+            mPriceTd.className = 'text-right';
+            mPriceTd.style.fontWeight = 'bold';
+            mPriceTd.style.color = '#2563eb';
+            mPriceTd.innerText = mPrice.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            const deleteManualBtn = document.createElement('button');
+            deleteManualBtn.innerHTML = '&times;';
+            deleteManualBtn.title = 'ลบรายการนี้';
+            deleteManualBtn.style.cssText = 'float: right; background: transparent; color: #ef4444; border: none; font-size: 16px; cursor: pointer; padding: 0 4px;';
+            deleteManualBtn.onclick = () => deleteManualMainItem(index);
+            mPriceTd.appendChild(deleteManualBtn);
+
+            mTr.appendChild(mPriceTd);
+            billingMainTbody.appendChild(mTr);
+        });
+
+        document.getElementById('billing-main-sum-footer').innerText = billingMainTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        // 3. Render Billing Other Tab Items
+        let billingOtherTotal = 0;
+        otherBillingItems.forEach((otherItem, index) => {
+            const oPrice = parseFloat(otherItem.price) || 0;
+            billingOtherTotal += oPrice;
+
+            const oTr = document.createElement('tr');
+
+            const oName = document.createElement('td');
+            oName.innerHTML = `<input type="text" value="${otherItem.name}" onchange="updateOtherName(${index}, this.value)">`;
+            oTr.appendChild(oName);
+
+            const oPriceTd = document.createElement('td');
+            oPriceTd.className = 'text-right';
+            oPriceTd.innerHTML = `<input type="number" style="text-align: right;" value="${otherItem.price || ''}" placeholder="0.00" onchange="updateOtherPrice(${index}, this.value)">`;
+            oTr.appendChild(oPriceTd);
+
+            const oDeleteTd = document.createElement('td');
+            oDeleteTd.className = 'text-center manage-col';
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerHTML = '&times;';
+            deleteBtn.title = 'ลบรายการนี้';
+            deleteBtn.style.cssText = 'background: transparent; color: #ef4444; border: none; font-size: 18px; cursor: pointer; padding: 0 4px;';
+            deleteBtn.onclick = () => deleteOtherItem(index);
+            oDeleteTd.appendChild(deleteBtn);
+            oTr.appendChild(oDeleteTd);
+
+            billingOtherTbody.appendChild(oTr);
+        });
+
+        document.getElementById('billing-other-sum-footer').innerText = billingOtherTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        const grandBillingTotal = billingMainTotal + billingOtherTotal;
+        const netTotal = totalAmount - grandBillingTotal;
+
+        document.getElementById('net-total-amount').innerText = netTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('billing-total-amount').innerText = grandBillingTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function exportBillingToJpg() {
+        const exportArea = document.getElementById('export-area');
+        
+        const deleteButtons = exportArea.querySelectorAll('button');
+        deleteButtons.forEach(btn => btn.style.display = 'none');
+        
+        const manageCols = exportArea.querySelectorAll('.manage-col');
+        manageCols.forEach(col => col.style.display = 'none');
+
+        const tableInputs = exportArea.querySelectorAll('table input');
+        const inputStates = [];
+        tableInputs.forEach(input => {
+            inputStates.push({ el: input, parent: input.parentNode, val: input.value });
+            const span = document.createElement('span');
+            span.innerText = input.value || '0';
+            span.style.padding = '6px 8px';
+            span.style.display = 'inline-block';
+            if (input.type === 'number') span.style.width = '100%';
+            input.parentNode.replaceChild(span, input);
+        });
+
+        html2canvas(exportArea, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff'
+        }).then(canvas => {
+            inputStates.forEach(item => {
+                if (item.parent.contains(item.el)) return;
+                const spans = item.parent.querySelectorAll('span');
+                spans.forEach(s => s.remove());
+                item.parent.appendChild(item.el);
+            });
+
+            deleteButtons.forEach(btn => btn.style.display = '');
+            manageCols.forEach(col => col.style.display = '');
+
+            const link = document.createElement('a');
+            link.download = 'billing-summary.jpg';
+            link.href = canvas.toDataURL('image/jpeg', 0.95);
+            link.click();
+            renderTable();
+        }).catch(err => {
+            renderTable();
+            deleteButtons.forEach(btn => btn.style.display = '');
+            manageCols.forEach(col => col.style.display = '');
+            alert('เกิดข้อผิดพลาดในการ Export รูปภาพ');
+            console.error(err);
+        });
+    }
+
+    function updateName(index, value) {
+        items[index].name = value;
+        saveToStorage();
+        renderTable();
+    }
+
+    function updatePrice(index, value) {
+        items[index].price = parseFloat(value) || 0;
+        saveToStorage();
+        renderTable();
+    }
+
+    function toggleBilling(index, isChecked) {
+        items[index].isBilling = isChecked;
+        saveToStorage();
+        renderTable();
+    }
+
+    function togglePaid(index, isChecked) {
+        const item = items[index];
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
+
+        if (isChecked) {
+            item.paid = true;
+            if (item.totalInstallments > 0) {
+                item.info = `จ่ายแล้ว งวดที่ ${item.currentInstallment}/${item.totalInstallments} (${dateStr})`;
+            } else {
+                item.info = `จ่ายแล้ว (${dateStr})`;
+            }
+        } else {
+            item.paid = false;
+            item.info = '';
+        }
+        saveToStorage();
+        renderTable();
+    }
+
+    function setInstallment(index) {
+        const total = prompt("ระบุจำนวนงวดทั้งหมด (เดือน):", "10");
+        if (total && !isNaN(total) && parseInt(total) > 0) {
+            items[index].totalInstallments = parseInt(total);
+            items[index].currentInstallment = 1;
+            saveToStorage();
+            renderTable();
+        }
+    }
+
+    function editInstallment(index) {
+        const item = items[index];
+        const current = prompt("แก้ไขจำนวนงวดที่จ่ายแล้วปัจจุบัน (เช่น 1, 2, 3...):", item.currentInstallment || 1);
+        if (current !== null && !isNaN(current)) {
+            const total = prompt("แก้ไขจำนวนงวดทั้งหมด:", item.totalInstallments);
+            if (total !== null && !isNaN(total)) {
+                item.currentInstallment = parseInt(current) || 0;
+                item.totalInstallments = parseInt(total) || 0;
+                if (item.totalInstallments === 0) item.currentInstallment = 0;
+                saveToStorage();
+                renderTable();
+            }
+        }
+    }
+
+    function setManualInstallment(index) {
+        const total = prompt("ระบุจำนวนงวดทั้งหมด (เดือน):", "10");
+        if (total && !isNaN(total) && parseInt(total) > 0) {
+            manualMainBillingItems[index].totalInstallments = parseInt(total);
+            manualMainBillingItems[index].currentInstallment = 1;
+            saveToStorage();
+            renderTable();
+        }
+    }
+
+    function editManualInstallment(index) {
+        const item = manualMainBillingItems[index];
+        const current = prompt("แก้ไขจำนวนงวดที่จ่ายแล้วปัจจุบัน (เช่น 1, 2, 3...):", item.currentInstallment || 1);
+        if (current !== null && !isNaN(current)) {
+            const total = prompt("แก้ไขจำนวนงวดทั้งหมด:", item.totalInstallments);
+            if (total !== null && !isNaN(total)) {
+                item.currentInstallment = parseInt(current) || 0;
+                item.totalInstallments = parseInt(total) || 0;
+                if (item.totalInstallments === 0) item.currentInstallment = 0;
+                saveToStorage();
+                renderTable();
+            }
+        }
+    }
+
+    function deleteItem(index) {
+        items.splice(index, 1);
+        saveToStorage();
+        renderTable();
+    }
+
+    function addNewItem() {
+        const nameInput = document.getElementById('new-name');
+        const priceInput = document.getElementById('new-price');
+        const instInput = document.getElementById('new-total-installments');
+        const billingInput = document.getElementById('new-is-billing');
+
+        const name = nameInput.value.trim();
+        if (!name) {
+            alert('กรุณากรอกชื่อรายการเรียกเก็บหรือค่าใช้จ่าย');
+            return;
+        }
+
+        const price = parseFloat(priceInput.value) || 0;
+        const totalInstallments = parseInt(instInput.value) || 0;
+        const isBilling = billingInput.checked;
+
+        items.push({
+            name: name,
+            price: price,
+            paid: false,
+            info: "",
+            currentInstallment: totalInstallments > 0 ? 1 : 0,
+            totalInstallments: totalInstallments,
+            isBilling: isBilling,
+            billingPaid: false
+        });
+
+        nameInput.value = '';
+        priceInput.value = '';
+        instInput.value = '';
+        billingInput.checked = false;
+
+        saveToStorage();
+        renderTable();
+    }
+
+    function addManualMainBillingItem() {
+        const nameInput = document.getElementById('manual-main-name');
+        const priceInput = document.getElementById('manual-main-price');
+
+        const name = nameInput.value.trim();
+        if (!name) {
+            alert('กรุณากรอกชื่อรายการเรียกเก็บ');
+            return;
+        }
+
+        const price = parseFloat(priceInput.value) || 0;
+
+        manualMainBillingItems.push({
+            name: name,
+            price: price,
+            currentInstallment: 0,
+            totalInstallments: 0
+        });
+
+        sendToGoogleSheet({ type: "manual_main", name: name, price: price });
+
+        nameInput.value = '';
+        priceInput.value = '';
+
+        saveToStorage();
+        renderTable();
+    }
+
+    function deleteManualMainItem(index) {
+        manualMainBillingItems.splice(index, 1);
+        saveToStorage();
+        renderTable();
+    }
+
+    function addOtherBillingItem() {
+        const inputEl = document.getElementById('other-name');
+        const priceInput = document.getElementById('other-price');
+
+        const name = inputEl.value.trim();
+        if (!name) {
+            alert('กรุณาเลือกหรือพิมพ์ชื่อรายการอื่นๆ');
+            return;
+        }
+
+        const price = parseFloat(priceInput.value) || 0;
+
+        otherBillingItems.push({
+            name: name,
+            price: price
+        });
+
+        sendToGoogleSheet({ type: "other_billing", name: name, price: price });
+
+        if (!savedOtherNames.includes(name)) {
+            savedOtherNames.push(name);
+            renderSavedOtherNamesList();
+        }
+
+        inputEl.value = '';
+        priceInput.value = '';
+
+        saveToStorage();
+        renderTable();
+    }
+
+    function clearSavedOtherNames() {
+        if (confirm('คุณต้องการล้างประวัติคำที่เคยพิมพ์ในหมวดอื่นๆ ใช่หรือไม่?')) {
+            savedOtherNames = [];
+            saveToStorage();
+            renderSavedOtherNamesList();
+        }
+    }
+
+    function updateOtherName(index, value) {
+        otherBillingItems[index].name = value;
+        saveToStorage();
+    }
+
+    function updateOtherPrice(index, value) {
+        otherBillingItems[index].price = parseFloat(value) || 0;
+        saveToStorage();
+        renderTable();
+    }
+
+    function deleteOtherItem(index) {
+        otherBillingItems.splice(index, 1);
+        saveToStorage();
+        renderTable();
+    }
+
+    function resetAllStatus() {
+        if (confirm('คุณต้องการรีเซ็ตสถานะการจ่ายทั้งหมดสำหรับเดือนใหม่ใช่หรือไม่? (รายการผ่อนชำระจะยังคงงวดเดิมไว้)')) {
+            items.forEach(item => {
+                item.paid = false;
+                item.info = '';
+            });
+            saveToStorage();
+            renderTable();
+        }
+    }
+
+    function clearLocalStorage() {
+        if (confirm('คำเตือน: คุณต้องการล้างข้อมูลทั้งหมดและคืนค่าเริ่มต้นใช่หรือไม่?')) {
+            localStorage.removeItem('expense_items_v35');
+            localStorage.removeItem('manual_main_billing_v35');
+            localStorage.removeItem('other_billing_items_v35');
+            localStorage.removeItem('saved_other_names_v35');
+            items = JSON.parse(JSON.stringify(defaultItems));
+            manualMainBillingItems = [];
+            otherBillingItems = [];
+            savedOtherNames = ["ค่าห้อง", "ค่าปรับ", "ค่าส่วนกลางเพิ่มเติม", "ค่าอินเทอร์เน็ต"];
+            renderSavedOtherNamesList();
+            renderTable();
+        }
+    }
+
+    renderSavedOtherNamesList();
+    renderTable();
+</script>
+
+</body>
+</html>
