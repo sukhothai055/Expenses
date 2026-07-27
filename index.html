@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบติดตามค่าใช้จ่าย</title>
+    <title>ระบบติดตามค่าใช้จ่าย (Sync Sheet)</title>
     <!-- Include html2canvas for exporting element to image -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -95,6 +95,7 @@
             border-radius: 8px;
             margin-bottom: 20px;
             font-weight: bold;
+            align-items: center;
         }
 
         .summary-item {
@@ -239,8 +240,11 @@
             <button class="tab-btn active" onclick="switchTab('main')">ค่าใช้จ่ายหลัก</button>
             <button class="tab-btn" onclick="switchTab('billing')">รายการเรียกเก็บ</button>
         </div>
-        <div id="export-btn-container" style="display: none;">
-            <button class="btn-success" onclick="exportBillingToJpg()">📷 Export เป็น JPG</button>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <button class="btn-success" onclick="syncWithGoogleSheet()" style="font-size: 13px; padding: 6px 12px;">🔄 โหลดข้อมูลจาก Sheet</button>
+            <div id="export-btn-container" style="display: none;">
+                <button class="btn-success" onclick="exportBillingToJpg()">📷 Export เป็น JPG</button>
+            </div>
         </div>
     </div>
 
@@ -248,6 +252,7 @@
     <div id="tab-main" class="tab-content active">
         <div class="summary-box">
             <div class="summary-item">ยอดรวมทั้งหมด (สุทธิ): <span id="net-total-amount">0.00</span> บาท</div>
+            <div id="sync-status" style="font-size: 12px; color: #64748b; font-weight: normal;">สถานะ: ออฟไลน์ / พร้อมเชื่อมต่อ</div>
         </div>
 
         <div class="controls">
@@ -347,7 +352,6 @@
             </table>
 
             <div class="add-row-form" id="form-other-section">
-                <!-- Using Datalist: Combines Dropdown selection + Type custom value -->
                 <input type="text" id="other-name" list="saved-other-names" placeholder="เลือกจากรายการ หรือพิมพ์กรอกเอง...">
                 <datalist id="saved-other-names">
                     <!-- Options populated by JS -->
@@ -366,7 +370,9 @@
 
     async function sendToGoogleSheet(payload) {
         if (!WEB_APP_URL) return;
+        const statusEl = document.getElementById('sync-status');
         try {
+            statusEl.innerText = "สถานะ: กำลังบันทึกลง Sheet...";
             await fetch(WEB_APP_URL, {
                 method: "POST",
                 mode: "no-cors",
@@ -375,8 +381,43 @@
                 },
                 body: JSON.stringify(payload)
             });
+            statusEl.innerText = "สถานะ: ซิงค์กับ Sheet แล้ว";
         } catch (error) {
             console.error("Google Sheet Sync Error:", error);
+            statusEl.innerText = "สถานะ: บันทึกลง Sheet ไม่สำเร็จ";
+        }
+    }
+
+    async function syncWithGoogleSheet() {
+        if (!WEB_APP_URL) return;
+        const statusEl = document.getElementById('sync-status');
+        statusEl.innerText = "สถานะ: กำลังดึงข้อมูลจาก Sheet...";
+        try {
+            let response = await fetch(WEB_APP_URL);
+            let result = await response.json();
+            
+            if (Array.isArray(result) && result.length > 0) {
+                // ตัวอย่างการโหลดข้อมูลอื่นๆ เข้ามาอัปเดตหน้าเว็บอัตโนมัติ
+                result.forEach(row => {
+                    if (row.type === 'other_billing') {
+                        if (!otherBillingItems.some(item => item.name === row.name && item.price === row.price)) {
+                            otherBillingItems.push({ name: row.name, price: row.price });
+                        }
+                    } else if (row.type === 'manual_main') {
+                        if (!manualMainBillingItems.some(item => item.name === row.name && item.price === row.price)) {
+                            manualMainBillingItems.push({ name: row.name, price: row.price, currentInstallment: 0, totalInstallments: 0 });
+                        }
+                    }
+                });
+                saveToStorage();
+                renderTable();
+                statusEl.innerText = "สถานะ: ซิงค์ข้อมูลล่าสุดสำเร็จ";
+            } else {
+                statusEl.innerText = "สถานะ: ไม่พบข้อมูลใน Sheet";
+            }
+        } catch (error) {
+            console.error("Fetch Error:", error);
+            statusEl.innerText = "สถานะ: เชื่อมต่อดึงข้อมูลไม่สำเร็จ";
         }
     }
 
@@ -400,16 +441,16 @@
         { name: "น้ำกิน", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false }
     ];
 
-    let items = JSON.parse(localStorage.getItem('expense_items_v35')) || defaultItems;
-    let manualMainBillingItems = JSON.parse(localStorage.getItem('manual_main_billing_v35')) || [];
-    let otherBillingItems = JSON.parse(localStorage.getItem('other_billing_items_v35')) || [];
-    let savedOtherNames = JSON.parse(localStorage.getItem('saved_other_names_v35')) || ["ค่าห้อง", "ค่าปรับ", "ค่าส่วนกลางเพิ่มเติม", "ค่าอินเทอร์เน็ต"];
+    let items = JSON.parse(localStorage.getItem('expense_items_v36')) || defaultItems;
+    let manualMainBillingItems = JSON.parse(localStorage.getItem('manual_main_billing_v36')) || [];
+    let otherBillingItems = JSON.parse(localStorage.getItem('other_billing_items_v36')) || [];
+    let savedOtherNames = JSON.parse(localStorage.getItem('saved_other_names_v36')) || ["ค่าห้อง", "ค่าปรับ", "ค่าส่วนกลางเพิ่มเติม", "ค่าอินเทอร์เน็ต"];
 
     function saveToStorage() {
-        localStorage.setItem('expense_items_v35', JSON.stringify(items));
-        localStorage.setItem('manual_main_billing_v35', JSON.stringify(manualMainBillingItems));
-        localStorage.setItem('other_billing_items_v35', JSON.stringify(otherBillingItems));
-        localStorage.setItem('saved_other_names_v35', JSON.stringify(savedOtherNames));
+        localStorage.setItem('expense_items_v36', JSON.stringify(items));
+        localStorage.setItem('manual_main_billing_v36', JSON.stringify(manualMainBillingItems));
+        localStorage.setItem('other_billing_items_v36', JSON.stringify(otherBillingItems));
+        localStorage.setItem('saved_other_names_v36', JSON.stringify(savedOtherNames));
     }
 
     function renderSavedOtherNamesList() {
@@ -933,10 +974,10 @@
 
     function clearLocalStorage() {
         if (confirm('คำเตือน: คุณต้องการล้างข้อมูลทั้งหมดและคืนค่าเริ่มต้นใช่หรือไม่?')) {
-            localStorage.removeItem('expense_items_v35');
-            localStorage.removeItem('manual_main_billing_v35');
-            localStorage.removeItem('other_billing_items_v35');
-            localStorage.removeItem('saved_other_names_v35');
+            localStorage.removeItem('expense_items_v36');
+            localStorage.removeItem('manual_main_billing_v36');
+            localStorage.removeItem('other_billing_items_v36');
+            localStorage.removeItem('saved_other_names_v36');
             items = JSON.parse(JSON.stringify(defaultItems));
             manualMainBillingItems = [];
             otherBillingItems = [];
