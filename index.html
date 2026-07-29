@@ -2,8 +2,8 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบติดตามค่าใช้จ่าย (Sync Sheet)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ระบบติดตามค่าใช้จ่าย</title>
     <!-- Include html2canvas for exporting element to image -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -25,58 +25,60 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 20px;
+            padding: 10px;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .container {
-            max-width: 950px;
+            max-width: 100%;
             margin: 0 auto;
             background: var(--card-bg);
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 14px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         h1 {
             text-align: center;
             color: #1e293b;
-            margin-bottom: 20px;
-            font-size: 24px;
+            margin-bottom: 15px;
+            font-size: 20px;
         }
 
-        /* Tabs styling */
+        /* Tabs styling for Mobile */
         .tabs {
             display: flex;
             border-bottom: 2px solid var(--border-color);
-            margin-bottom: 20px;
-            gap: 10px;
+            margin-bottom: 15px;
+            gap: 5px;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
+            flex-direction: column;
         }
 
         .tab-buttons {
             display: flex;
-            gap: 10px;
+            gap: 5px;
+            width: 100%;
         }
 
         .tab-btn {
-            background: none;
+            flex: 1;
+            background: #e2e8f0;
             border: none;
-            padding: 10px 20px;
-            font-size: 16px;
+            padding: 10px;
+            font-size: 14px;
             font-weight: 600;
             color: #64748b;
             cursor: pointer;
-            border-bottom: 3px solid transparent;
-            margin-bottom: -2px;
+            border-radius: 6px;
+            text-align: center;
             transition: all 0.2s;
         }
 
         .tab-btn.active {
-            color: var(--primary-color);
-            border-bottom-color: var(--primary-color);
-            background: transparent;
+            color: white;
+            background-color: var(--primary-color);
         }
 
         .tab-content {
@@ -89,71 +91,74 @@
 
         .summary-box {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            gap: 5px;
             background: #f1f5f9;
-            padding: 16px;
+            padding: 12px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             font-weight: bold;
-            align-items: center;
         }
 
         .summary-item {
-            font-size: 16px;
+            font-size: 14px;
         }
         .summary-item span {
             color: #1e293b;
-            font-size: 18px;
+            font-size: 16px;
         }
 
         .controls {
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 16px;
-            gap: 10px;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
         button {
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 10px 14px;
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
-            transition: background-color 0.2s;
+            font-weight: 500;
+            width: 100%;
+            text-align: center;
         }
 
-        button:hover {
-            background-color: var(--primary-hover);
+        button:active {
+            opacity: 0.8;
         }
 
         button.btn-danger {
             background-color: var(--danger-color);
         }
-        button.btn-danger:hover {
-            background-color: #dc2626;
-        }
 
         button.btn-success {
             background-color: #10b981;
         }
-        button.btn-success:hover {
-            background-color: #059669;
+
+        /* Mobile Responsive Table Wrapper */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 15px;
         }
 
         table {
             width: 100%;
+            min-width: 550px;
             border-collapse: collapse;
-            margin-bottom: 20px;
         }
 
         th, td {
             border: 1px solid var(--border-color);
-            padding: 10px 12px;
+            padding: 8px 10px;
             text-align: left;
-            font-size: 14px;
+            font-size: 13px;
             vertical-align: middle;
         }
 
@@ -173,24 +178,24 @@
 
         input[type="text"], input[type="number"] {
             width: 100%;
-            padding: 6px 8px;
+            padding: 8px;
             box-sizing: border-box;
             border: 1px solid var(--border-color);
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 14px;
             background-color: #ffffff;
         }
 
         input[type="checkbox"] {
-            transform: scale(1.3);
+            transform: scale(1.4);
             cursor: pointer;
         }
 
         .badge {
             display: inline-block;
-            padding: 4px 8px;
+            padding: 3px 6px;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 11px;
             background-color: var(--success-bg);
             color: var(--success-text);
             font-weight: 500;
@@ -198,33 +203,32 @@
 
         .add-row-form {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            padding: 15px;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 12px;
             background: #f8fafc;
             border-radius: 8px;
             border: 1px dashed var(--border-color);
-            flex-wrap: wrap;
         }
 
         .add-row-form input {
-            flex: 1;
-            min-width: 150px;
+            width: 100%;
         }
 
         .section-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             color: #1e293b;
-            margin-top: 24px;
-            margin-bottom: 10px;
+            margin-top: 18px;
+            margin-bottom: 8px;
             border-left: 4px solid var(--primary-color);
-            padding-left: 8px;
+            padding-left: 6px;
         }
 
         #export-area {
             background-color: #ffffff;
-            padding: 20px;
+            padding: 10px;
             border-radius: 8px;
         }
     </style>
@@ -240,10 +244,10 @@
             <button class="tab-btn active" onclick="switchTab('main')">ค่าใช้จ่ายหลัก</button>
             <button class="tab-btn" onclick="switchTab('billing')">รายการเรียกเก็บ</button>
         </div>
-        <div style="display: flex; gap: 8px; align-items: center;">
-            <button class="btn-success" onclick="syncWithGoogleSheet()" style="font-size: 13px; padding: 6px 12px;">🔄 โหลดข้อมูลจาก Sheet</button>
-            <div id="export-btn-container" style="display: none;">
-                <button class="btn-success" onclick="exportBillingToJpg()">📷 Export เป็น JPG</button>
+        <div style="display: flex; gap: 6px; width: 100%;">
+            <button class="btn-success" onclick="syncWithGoogleSheet()" style="font-size: 13px; padding: 8px;">🔄 โหลดข้อมูลจาก Sheet</button>
+            <div id="export-btn-container" style="display: none; flex: 1;">
+                <button class="btn-success" onclick="exportBillingToJpg()" style="font-size: 13px; padding: 8px;">📷 Export JPG</button>
             </div>
         </div>
     </div>
@@ -252,7 +256,7 @@
     <div id="tab-main" class="tab-content active">
         <div class="summary-box">
             <div class="summary-item">ยอดรวมทั้งหมด (สุทธิ): <span id="net-total-amount">0.00</span> บาท</div>
-            <div id="sync-status" style="font-size: 12px; color: #64748b; font-weight: normal;">สถานะ: ออฟไลน์ / พร้อมเชื่อมต่อ</div>
+            <div id="sync-status" style="font-size: 11px; color: #64748b; font-weight: normal;">สถานะ: พร้อมใช้งาน</div>
         </div>
 
         <div class="controls">
@@ -260,28 +264,30 @@
             <button class="btn-danger" onclick="clearLocalStorage()">ล้างข้อมูลทั้งหมด</button>
         </div>
 
-        <table id="expense-table">
-            <thead>
-                <tr>
-                    <th style="width: 28%;">รายการ</th>
-                    <th style="width: 14%;" class="text-right">ราคา (บาท)</th>
-                    <th style="width: 14%;" class="text-center">ผ่อนจ่าย (งวด)</th>
-                    <th style="width: 12%;" class="text-center">เรียกเก็บ</th>
-                    <th style="width: 10%;" class="text-center">จ่ายแล้ว</th>
-                    <th style="width: 22%;">ข้อมูล</th>
-                </tr>
-            </thead>
-            <tbody id="expense-tbody">
-                <!-- Data populated by JS -->
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table id="expense-table">
+                <thead>
+                    <tr>
+                        <th style="min-width: 110px;">รายการ</th>
+                        <th style="min-width: 80px;" class="text-right">ราคา</th>
+                        <th style="min-width: 90px;" class="text-center">ผ่อนจ่าย</th>
+                        <th style="min-width: 60px;" class="text-center">เก็บ</th>
+                        <th style="min-width: 60px;" class="text-center">จ่าย</th>
+                        <th style="min-width: 130px;">ข้อมูล</th>
+                    </tr>
+                </thead>
+                <tbody id="expense-tbody">
+                    <!-- Data populated by JS -->
+                </tbody>
+            </table>
+        </div>
 
         <div class="add-row-form">
             <input type="text" id="new-name" placeholder="ชื่อรายการใหม่...">
-            <input type="number" id="new-price" placeholder="ราคา" style="max-width: 110px;">
-            <input type="number" id="new-total-installments" placeholder="จำนวนงวด (ถ้ามี)" style="max-width: 140px;">
-            <label style="display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;">
-                <input type="checkbox" id="new-is-billing"> รายการเรียกเก็บ
+            <input type="number" id="new-price" placeholder="ราคา (บาท)">
+            <input type="number" id="new-total-installments" placeholder="จำนวนงวด (ถ้ามี)">
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; padding: 4px 0;">
+                <input type="checkbox" id="new-is-billing"> ติ๊กเป็นรายการเรียกเก็บ
             </label>
             <button onclick="addNewItem()">เพิ่มรายการ</button>
         </div>
@@ -291,73 +297,73 @@
     <div id="tab-billing" class="tab-content">
         <div id="export-area">
             <div class="summary-box">
-                <div class="summary-item">ยอดรวมรายการเรียกเก็บทั้งหมด: <span id="billing-total-amount">0.00</span> บาท</div>
+                <div class="summary-item">ยอดรวมเรียกเก็บทั้งหมด: <span id="billing-total-amount">0.00</span> บาท</div>
             </div>
             
             <!-- Category 1: Main Billing Items -->
             <div class="section-title">1. รายการเรียกเก็บ</div>
-            <p style="font-size: 13px; color: #64748b; margin-top: 0;">ดึงมาจากรายการที่ติ๊ก "รายการเรียกเก็บ" ในแท็บค่าใช้จ่ายหลัก (หารสองอัตโนมัติ), สามารถเพิ่มรายการเองได้โดยตรง, และรวมยอดจากหมวด "อื่นๆ" ด้านล่าง</p>
+            <p style="font-size: 12px; color: #64748b; margin-top: 0;">ดึงจากรายการหลัก (หารสอง) + รายการเพิ่มพิเศษ</p>
 
-            <table id="billing-main-table">
-                <thead>
-                    <tr>
-                        <th style="width: 45%;">รายการ</th>
-                        <th style="width: 20%;" class="text-center">ผ่อนจ่าย (งวด)</th>
-                        <th style="width: 35%;" class="text-right" style="color: #2563eb;">ยอดเรียกเก็บ</th>
-                    </tr>
-                </thead>
-                <tbody id="billing-main-tbody">
-                    <!-- Populated by JS -->
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="2" style="font-weight: bold;">รวม</td>
-                        <td id="billing-main-sum-footer" class="text-right" style="font-weight: bold; color: #2563eb;">0.00</td>
-                    </tr>
-                </tfoot>
-            </table>
+            <div class="table-responsive">
+                <table id="billing-main-table">
+                    <thead>
+                        <tr>
+                            <th>รายการ</th>
+                            <th class="text-center" style="width: 70px;">งวด</th>
+                            <th class="text-right" style="color: #2563eb; width: 90px;">ยอดเก็บ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="billing-main-tbody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2" style="font-weight: bold;">รวม</td>
+                            <td id="billing-main-sum-footer" class="text-right" style="font-weight: bold; color: #2563eb;">0.00</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
 
-            <!-- Form for adding main billing item placed inside export area -->
             <div class="add-row-form" id="form-manual-main">
                 <input type="text" id="manual-main-name" placeholder="ชื่อรายการเรียกเก็บ...">
-                <input type="number" id="manual-main-price" placeholder="ยอดเรียกเก็บ" style="max-width: 150px;">
+                <input type="number" id="manual-main-price" placeholder="ยอดเรียกเก็บ">
                 <button onclick="addManualMainBillingItem()">เพิ่มรายการเรียกเก็บ</button>
             </div>
 
             <!-- Category 2: Other Billing Items -->
-            <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px;" id="title-other-section">
+            <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
                 <span>2. อื่นๆ (เพิ่มทีหลัง)</span>
-                <button onclick="clearSavedOtherNames()" style="background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 4px 8px; font-size: 12px; border-radius: 4px;">ล้างประวัติคำ</button>
+                <button onclick="clearSavedOtherNames()" style="background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 4px 8px; font-size: 11px; width: auto; border-radius: 4px;">ล้างประวัติคำ</button>
             </div>
-            <p style="font-size: 13px; color: #64748b; margin-top: 0;" id="desc-other-section">รายการเพิ่มเติมพิเศษ สามารถเพิ่มและลบรายรายการได้</p>
 
-            <table id="billing-other-table">
-                <thead>
-                    <tr>
-                        <th style="width: 65%;">รายการ</th>
-                        <th style="width: 25%;" class="text-right">ยอดเรียกเก็บ</th>
-                        <th style="width: 10%;" class="text-center manage-col">ลบ</th>
-                    </tr>
-                </thead>
-                <tbody id="billing-other-tbody">
-                    <!-- Populated by JS -->
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td style="font-weight: bold;">รวม</td>
-                        <td id="billing-other-sum-footer" class="text-right" style="font-weight: bold;">0.00</td>
-                        <td class="manage-col"></td>
-                    </tr>
-                </tfoot>
-            </table>
+            <div class="table-responsive">
+                <table id="billing-other-table">
+                    <thead>
+                        <tr>
+                            <th>รายการ</th>
+                            <th class="text-right" style="width: 90px;">ยอดเก็บ</th>
+                            <th class="text-center manage-col" style="width: 40px;">ลบ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="billing-other-tbody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td>รวม</td>
+                            <td id="billing-other-sum-footer" class="text-right" style="font-weight: bold;">0.00</td>
+                            <td class="manage-col"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
 
             <div class="add-row-form" id="form-other-section">
-                <input type="text" id="other-name" list="saved-other-names" placeholder="เลือกจากรายการ หรือพิมพ์กรอกเอง...">
-                <datalist id="saved-other-names">
-                    <!-- Options populated by JS -->
-                </datalist>
+                <input type="text" id="other-name" list="saved-other-names" placeholder="เลือกหรือพิมพ์ชื่อรายการอื่นๆ...">
+                <datalist id="saved-other-names"></datalist>
                 
-                <input type="number" id="other-price" placeholder="ยอดเรียกเก็บ" style="max-width: 150px;">
+                <input type="number" id="other-price" placeholder="ยอดเรียกเก็บ">
                 <button onclick="addOtherBillingItem()">เพิ่มรายการอื่นๆ</button>
             </div>
         </div>
@@ -376,9 +382,7 @@
             await fetch(WEB_APP_URL, {
                 method: "POST",
                 mode: "no-cors",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
             statusEl.innerText = "สถานะ: ซิงค์กับ Sheet แล้ว";
@@ -391,13 +395,12 @@
     async function syncWithGoogleSheet() {
         if (!WEB_APP_URL) return;
         const statusEl = document.getElementById('sync-status');
-        statusEl.innerText = "สถานะ: กำลังดึงข้อมูลจาก Sheet...";
+        statusEl.innerText = "สถานะ: กำลังดึงข้อมูล...";
         try {
             let response = await fetch(WEB_APP_URL);
             let result = await response.json();
             
             if (Array.isArray(result) && result.length > 0) {
-                // ตัวอย่างการโหลดข้อมูลอื่นๆ เข้ามาอัปเดตหน้าเว็บอัตโนมัติ
                 result.forEach(row => {
                     if (row.type === 'other_billing') {
                         if (!otherBillingItems.some(item => item.name === row.name && item.price === row.price)) {
@@ -411,13 +414,13 @@
                 });
                 saveToStorage();
                 renderTable();
-                statusEl.innerText = "สถานะ: ซิงค์ข้อมูลล่าสุดสำเร็จ";
+                statusEl.innerText = "สถานะ: อัปเดตข้อมูลสำเร็จ";
             } else {
-                statusEl.innerText = "สถานะ: ไม่พบข้อมูลใน Sheet";
+                statusEl.innerText = "สถานะ: ไม่พบข้อมูลใหม่";
             }
         } catch (error) {
             console.error("Fetch Error:", error);
-            statusEl.innerText = "สถานะ: เชื่อมต่อดึงข้อมูลไม่สำเร็จ";
+            statusEl.innerText = "สถานะ: ดึงข้อมูลไม่สำเร็จ";
         }
     }
 
@@ -495,7 +498,6 @@
         let totalItemsCount = items.length;
         let paidItemsCount = 0;
 
-        // 1. Render Main Items
         items.forEach((item, index) => {
             const price = parseFloat(item.price) || 0;
             totalAmount += price;
@@ -524,9 +526,9 @@
             const tdInstConfig = document.createElement('td');
             tdInstConfig.className = 'text-center';
             if (item.totalInstallments > 0) {
-                tdInstConfig.innerHTML = `<span style="font-size: 12px;">งวด ${item.currentInstallment || 0}/${item.totalInstallments}</span><br><button style="padding: 2px 4px; font-size: 10px; margin-top: 2px;" onclick="editInstallment(${index})">ตั้งค่า</button>`;
+                tdInstConfig.innerHTML = `<span style="font-size: 11px;">งวด ${item.currentInstallment || 0}/${item.totalInstallments}</span><br><button style="padding: 2px; font-size: 10px; width: auto; margin-top: 2px;" onclick="editInstallment(${index})">ตั้งค่า</button>`;
             } else {
-                tdInstConfig.innerHTML = `<button style="padding: 2px 4px; font-size: 10px;" onclick="setInstallment(${index})">ทำเป็นผ่อน</button>`;
+                tdInstConfig.innerHTML = `<button style="padding: 2px; font-size: 10px; width: auto;" onclick="setInstallment(${index})">ผ่อน</button>`;
             }
             tr.appendChild(tdInstConfig);
 
@@ -549,19 +551,17 @@
             tr.appendChild(tdStatus);
 
             const tdInfo = document.createElement('td');
-            tdInfo.innerHTML = item.info ? `<span class="badge">${item.info}</span>` : `<span style="color: #cbd5e1; font-size: 13px;">-</span>`;
+            tdInfo.innerHTML = item.info ? `<span class="badge">${item.info}</span>` : `<span style="color: #cbd5e1; font-size: 12px;">-</span>`;
             
             const deleteBtn = document.createElement('button');
             deleteBtn.innerHTML = '&times;';
-            deleteBtn.title = 'ลบรายการนี้';
-            deleteBtn.style.cssText = 'float: right; background: transparent; color: #94a3b8; border: none; font-size: 16px; cursor: pointer; padding: 0 4px;';
+            deleteBtn.style.cssText = 'float: right; background: transparent; color: #94a3b8; border: none; font-size: 16px; cursor: pointer; padding: 0 4px; width: auto;';
             deleteBtn.onclick = () => deleteItem(index);
             tdInfo.appendChild(deleteBtn);
 
             tr.appendChild(tdInfo);
             tbody.appendChild(tr);
 
-            // Render Billing Main Table
             if (item.isBilling) {
                 const bTr = document.createElement('tr');
                 
@@ -572,9 +572,9 @@
                 const bInst = document.createElement('td');
                 bInst.className = 'text-center';
                 if (item.totalInstallments > 0) {
-                    bInst.innerHTML = `<span style="font-size: 12px;">งวด ${item.currentInstallment || 0}/${item.totalInstallments}</span><br><button style="padding: 2px 4px; font-size: 10px; margin-top: 2px;" onclick="editInstallment(${index})">ตั้งค่า</button>`;
+                    bInst.innerHTML = `<span style="font-size: 11px;">งวด ${item.currentInstallment || 0}/${item.totalInstallments}</span><br><button style="padding: 2px; font-size: 10px; width: auto; margin-top: 2px;" onclick="editInstallment(${index})">ตั้งค่า</button>`;
                 } else {
-                    bInst.innerHTML = `<button style="padding: 2px 4px; font-size: 10px;" onclick="setInstallment(${index})">ทำเป็นผ่อน</button>`;
+                    bInst.innerHTML = `<button style="padding: 2px; font-size: 10px; width: auto;" onclick="setInstallment(${index})">ผ่อน</button>`;
                 }
                 bTr.appendChild(bInst);
 
@@ -613,7 +613,6 @@
             }, 600);
         }
 
-        // 2. Render Manually Added Main Billing Items
         manualMainBillingItems.forEach((manualItem, index) => {
             const mPrice = parseFloat(manualItem.price) || 0;
             billingMainTotal += mPrice;
@@ -627,9 +626,9 @@
             const mInst = document.createElement('td');
             mInst.className = 'text-center';
             if (manualItem.totalInstallments > 0) {
-                mInst.innerHTML = `<span style="font-size: 12px;">งวด ${manualItem.currentInstallment || 0}/${manualItem.totalInstallments}</span><br><button style="padding: 2px 4px; font-size: 10px; margin-top: 2px;" onclick="editManualInstallment(${index})">ตั้งค่า</button>`;
+                mInst.innerHTML = `<span style="font-size: 11px;">งวด ${manualItem.currentInstallment || 0}/${manualItem.totalInstallments}</span><br><button style="padding: 2px; font-size: 10px; width: auto; margin-top: 2px;" onclick="editManualInstallment(${index})">ตั้งค่า</button>`;
             } else {
-                mInst.innerHTML = `<button style="padding: 2px 4px; font-size: 10px;" onclick="setManualInstallment(${index})">ทำเป็นผ่อน</button>`;
+                mInst.innerHTML = `<button style="padding: 2px; font-size: 10px; width: auto;" onclick="setManualInstallment(${index})">ผ่อน</button>`;
             }
             mTr.appendChild(mInst);
 
@@ -641,8 +640,7 @@
 
             const deleteManualBtn = document.createElement('button');
             deleteManualBtn.innerHTML = '&times;';
-            deleteManualBtn.title = 'ลบรายการนี้';
-            deleteManualBtn.style.cssText = 'float: right; background: transparent; color: #ef4444; border: none; font-size: 16px; cursor: pointer; padding: 0 4px;';
+            deleteManualBtn.style.cssText = 'float: right; background: transparent; color: #ef4444; border: none; font-size: 16px; cursor: pointer; padding: 0 4px; width: auto;';
             deleteManualBtn.onclick = () => deleteManualMainItem(index);
             mPriceTd.appendChild(deleteManualBtn);
 
@@ -652,7 +650,6 @@
 
         document.getElementById('billing-main-sum-footer').innerText = billingMainTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-        // 3. Render Billing Other Tab Items
         let billingOtherTotal = 0;
         otherBillingItems.forEach((otherItem, index) => {
             const oPrice = parseFloat(otherItem.price) || 0;
@@ -673,8 +670,7 @@
             oDeleteTd.className = 'text-center manage-col';
             const deleteBtn = document.createElement('button');
             deleteBtn.innerHTML = '&times;';
-            deleteBtn.title = 'ลบรายการนี้';
-            deleteBtn.style.cssText = 'background: transparent; color: #ef4444; border: none; font-size: 18px; cursor: pointer; padding: 0 4px;';
+            deleteBtn.style.cssText = 'background: transparent; color: #ef4444; border: none; font-size: 18px; cursor: pointer; padding: 0; width: auto;';
             deleteBtn.onclick = () => deleteOtherItem(index);
             oDeleteTd.appendChild(deleteBtn);
             oTr.appendChild(oDeleteTd);
@@ -706,7 +702,7 @@
             inputStates.push({ el: input, parent: input.parentNode, val: input.value });
             const span = document.createElement('span');
             span.innerText = input.value || '0';
-            span.style.padding = '6px 8px';
+            span.style.padding = '6px';
             span.style.display = 'inline-block';
             if (input.type === 'number') span.style.width = '100%';
             input.parentNode.replaceChild(span, input);
@@ -791,7 +787,7 @@
 
     function editInstallment(index) {
         const item = items[index];
-        const current = prompt("แก้ไขจำนวนงวดที่จ่ายแล้วปัจจุบัน (เช่น 1, 2, 3...):", item.currentInstallment || 1);
+        const current = prompt("แก้ไขจำนวนงวดที่จ่ายแล้วปัจจุบัน:", item.currentInstallment || 1);
         if (current !== null && !isNaN(current)) {
             const total = prompt("แก้ไขจำนวนงวดทั้งหมด:", item.totalInstallments);
             if (total !== null && !isNaN(total)) {
@@ -816,7 +812,7 @@
 
     function editManualInstallment(index) {
         const item = manualMainBillingItems[index];
-        const current = prompt("แก้ไขจำนวนงวดที่จ่ายแล้วปัจจุบัน (เช่น 1, 2, 3...):", item.currentInstallment || 1);
+        const current = prompt("แก้ไขจำนวนงวดที่จ่ายแล้วปัจจุบัน:", item.currentInstallment || 1);
         if (current !== null && !isNaN(current)) {
             const total = prompt("แก้ไขจำนวนงวดทั้งหมด:", item.totalInstallments);
             if (total !== null && !isNaN(total)) {
@@ -843,7 +839,7 @@
 
         const name = nameInput.value.trim();
         if (!name) {
-            alert('กรุณากรอกชื่อรายการเรียกเก็บหรือค่าใช้จ่าย');
+            alert('กรุณากรอกชื่อรายการ');
             return;
         }
 
@@ -911,7 +907,7 @@
 
         const name = inputEl.value.trim();
         if (!name) {
-            alert('กรุณาเลือกหรือพิมพ์ชื่อรายการอื่นๆ');
+            alert('กรุณาเลือกหรือพิมพ์ชื่อรายการ');
             return;
         }
 
@@ -937,7 +933,7 @@
     }
 
     function clearSavedOtherNames() {
-        if (confirm('คุณต้องการล้างประวัติคำที่เคยพิมพ์ในหมวดอื่นๆ ใช่หรือไม่?')) {
+        if (confirm('คุณต้องการล้างประวัติคำใช่หรือไม่?')) {
             savedOtherNames = [];
             saveToStorage();
             renderSavedOtherNamesList();
@@ -962,7 +958,7 @@
     }
 
     function resetAllStatus() {
-        if (confirm('คุณต้องการรีเซ็ตสถานะการจ่ายทั้งหมดสำหรับเดือนใหม่ใช่หรือไม่? (รายการผ่อนชำระจะยังคงงวดเดิมไว้)')) {
+        if (confirm('ต้องการรีเซ็ตสถานะการจ่ายทั้งหมดสำหรับเดือนใหม่ใช่หรือไม่?')) {
             items.forEach(item => {
                 item.paid = false;
                 item.info = '';
@@ -973,7 +969,7 @@
     }
 
     function clearLocalStorage() {
-        if (confirm('คำเตือน: คุณต้องการล้างข้อมูลทั้งหมดและคืนค่าเริ่มต้นใช่หรือไม่?')) {
+        if (confirm('คำเตือน: ล้างข้อมูลทั้งหมดและคืนค่าเริ่มต้นใช่หรือไม่?')) {
             localStorage.removeItem('expense_items_v36');
             localStorage.removeItem('manual_main_billing_v36');
             localStorage.removeItem('other_billing_items_v36');
