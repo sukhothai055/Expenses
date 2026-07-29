@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ระบบติดตามค่าใช้จ่าย V1.1 (Sync All)</title>
+    <title>ระบบติดตามค่าใช้จ่าย (Sync All)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -214,6 +214,14 @@
             padding: 10px;
             border-radius: 8px;
         }
+
+        .version-footer {
+            text-align: center;
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -340,6 +348,9 @@
             </div>
         </div>
     </div>
+
+    <!-- แสดงเวอร์ชั่นของแอป -->
+    <div class="version-footer">Version 1.0.0</div>
 </div>
 
 <script>
@@ -680,7 +691,7 @@
         syncAllToGoogleSheet();
     }
 
-    // ฟังก์ชัน Export JPG รองรับ Android WebView (APK) โดยใช้ Blob URL
+    // ฟังก์ชัน Export JPG เต็มหน้าจริง (ดึงขนาดตามความกว้าง/ความสูงจริงของเนื้อหา)
     function exportBillingToJpg() {
         const exportArea = document.getElementById('export-area');
         const deleteButtons = exportArea.querySelectorAll('button');
@@ -688,7 +699,15 @@
         const manageCols = exportArea.querySelectorAll('.manage-col');
         manageCols.forEach(col => col.style.display = 'none');
 
-        html2canvas(exportArea, { scale: 2, useCORS: true, backgroundColor: '#ffffff' }).then(canvas => {
+        html2canvas(exportArea, { 
+            scale: 2, 
+            useCORS: true, 
+            backgroundColor: '#ffffff',
+            windowWidth: exportArea.scrollWidth,
+            windowHeight: exportArea.scrollHeight,
+            width: exportArea.scrollWidth,
+            height: exportArea.scrollHeight
+        }).then(canvas => {
             deleteButtons.forEach(btn => btn.style.display = '');
             manageCols.forEach(col => col.style.display = '');
             
@@ -696,7 +715,7 @@
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = 'billing-summary.jpg';
+                link.download = 'billing-summary-full.jpg';
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
