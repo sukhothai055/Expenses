@@ -283,6 +283,7 @@
 
     <!-- Tab 2 -->
     <div id="tab-billing" class="tab-content">
+        <!-- ย้าย #export-area ให้ครอบคลุมทั้งส่วนสรุป, ตารางที่ 1 และตารางที่ 2 เพื่อให้ Export เห็นทั้งหมด -->
         <div id="export-area">
             <div class="summary-box">
                 <div class="summary-item">ยอดรวมเรียกเก็บทั้งหมด: <span id="billing-total-amount">0.00</span> บาท</div>
@@ -308,17 +309,7 @@
                 </table>
             </div>
 
-            <div class="add-row-form" id="form-manual-main">
-                <input type="text" id="manual-main-name" placeholder="ชื่อรายการเรียกเก็บ...">
-                <input type="number" id="manual-main-price" placeholder="ยอดเรียกเก็บ">
-                <button onclick="addManualMainBillingItem()">เพิ่มรายการเรียกเก็บ</button>
-            </div>
-
-            <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-                <span>2. อื่นๆ (เพิ่มทีหลัง)</span>
-                <button onclick="clearSavedOtherNames()" style="background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 4px 8px; font-size: 11px; width: auto; border-radius: 4px;">ล้างประวัติคำ</button>
-            </div>
-
+            <div class="section-title" style="margin-top: 20px;">2. อื่นๆ (เพิ่มทีหลัง)</div>
             <div class="table-responsive">
                 <table id="billing-other-table">
                     <thead>
@@ -338,14 +329,26 @@
                     </tfoot>
                 </table>
             </div>
+        </div>
 
-            <div class="add-row-form" id="form-other-section">
-                <input type="text" id="other-name" list="saved-other-names" placeholder="เลือกหรือพิมพ์ชื่อรายการอื่นๆ...">
-                <datalist id="saved-other-names"></datalist>
-                
-                <input type="number" id="other-price" placeholder="ยอดเรียกเก็บ">
-                <button onclick="addOtherBillingItem()">เพิ่มรายการอื่นๆ</button>
-            </div>
+        <!-- ฟอร์มสำหรับเพิ่มข้อมูลจะอยู่ภายนอกพื้นที่ Export เพื่อไม่ให้ติดปุ่มหรือช่องกรอกตอนถ่ายรูป -->
+        <div class="add-row-form" id="form-manual-main">
+            <input type="text" id="manual-main-name" placeholder="ชื่อรายการเรียกเก็บ...">
+            <input type="number" id="manual-main-price" placeholder="ยอดเรียกเก็บ">
+            <button onclick="addManualMainBillingItem()">เพิ่มรายการเรียกเก็บ</button>
+        </div>
+
+        <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+            <span>จัดการรายการอื่นๆ</span>
+            <button onclick="clearSavedOtherNames()" style="background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 4px 8px; font-size: 11px; width: auto; border-radius: 4px;">ล้างประวัติคำ</button>
+        </div>
+
+        <div class="add-row-form" id="form-other-section">
+            <input type="text" id="other-name" list="saved-other-names" placeholder="เลือกหรือพิมพ์ชื่อรายการอื่นๆ...">
+            <datalist id="saved-other-names"></datalist>
+            
+            <input type="number" id="other-price" placeholder="ยอดเรียกเก็บ">
+            <button onclick="addOtherBillingItem()">เพิ่มรายการอื่นๆ</button>
         </div>
     </div>
 
@@ -517,8 +520,8 @@
                     <td>${item.name}</td>
                     <td class="text-center">
                         ${item.totalInstallments > 0 ? 
-                            `<span style="font-size: 11px;">งวด ${item.currentInstallment || 0}/${item.totalInstallments}</span><br><button style="padding: 2px; font-size: 10px; width: auto; margin-top: 2px;" onclick="editInstallment(${index})">ตั้งค่า</button>` : 
-                            `<button style="padding: 2px; font-size: 10px; width: auto;" onclick="setInstallment(${index})">ผ่อน</button>`}
+                            `<span style="font-size: 11px;">งวด ${item.currentInstallment || 0}/${item.totalInstallments}</span>` : 
+                            `-`}
                     </td>
                     <td class="text-right" style="font-weight: bold; color: #2563eb;">${halfPrice.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                 `;
@@ -536,7 +539,6 @@
                 <td class="text-center">-</td>
                 <td class="text-right" style="font-weight: bold; color: #2563eb;">
                     ${mPrice.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    <button style="float: right; background: transparent; color: #ef4444; border: none; font-size: 16px; cursor: pointer; padding: 0 4px; width: auto;" onclick="deleteManualMainItem(${index})">&times;</button>
                 </td>
             `;
             billingMainTbody.appendChild(mTr);
@@ -636,8 +638,6 @@
         saveAndSync();
     }
 
-    function deleteManualMainItem(index) { manualMainBillingItems.splice(index, 1); saveAndSync(); }
-
     function addOtherBillingItem() {
         const inputEl = document.getElementById('other-name');
         const name = inputEl.value.trim();
@@ -691,13 +691,24 @@
         syncAllToGoogleSheet();
     }
 
-    // ฟังก์ชัน Export JPG เต็มหน้าจริง (ดึงขนาดตามความกว้าง/ความสูงจริงของเนื้อหา)
+    // ฟังก์ชัน Export JPG เต็มหน้าเนื้อหาทั้งหมด (รวมสรุป, ตารางที่ 1 และตารางที่ 2 ครบถ้วน)
     function exportBillingToJpg() {
         const exportArea = document.getElementById('export-area');
-        const deleteButtons = exportArea.querySelectorAll('button');
-        deleteButtons.forEach(btn => btn.style.display = 'none');
         const manageCols = exportArea.querySelectorAll('.manage-col');
         manageCols.forEach(col => col.style.display = 'none');
+
+        // แปลง input ในตารางอื่นๆ ให้เป็นข้อความธรรมดาชั่วคราวเพื่อให้ภาพออกมาสวยงาม
+        const tableInputs = exportArea.querySelectorAll('table input');
+        const inputStates = [];
+        tableInputs.forEach(input => {
+            inputStates.push({ el: input, parent: input.parentNode, val: input.value });
+            const span = document.createElement('span');
+            span.innerText = input.value || '0';
+            span.style.padding = '6px';
+            span.style.display = 'inline-block';
+            if (input.type === 'number') span.style.width = '100%';
+            input.parentNode.replaceChild(span, input);
+        });
 
         html2canvas(exportArea, { 
             scale: 2, 
@@ -708,7 +719,12 @@
             width: exportArea.scrollWidth,
             height: exportArea.scrollHeight
         }).then(canvas => {
-            deleteButtons.forEach(btn => btn.style.display = '');
+            inputStates.forEach(item => {
+                if (item.parent.contains(item.el)) return;
+                const spans = item.parent.querySelectorAll('span');
+                spans.forEach(s => s.remove());
+                item.parent.appendChild(item.el);
+            });
             manageCols.forEach(col => col.style.display = '');
             
             canvas.toBlob(function(blob) {
@@ -725,7 +741,6 @@
             renderTable();
         }).catch(err => {
             renderTable();
-            deleteButtons.forEach(btn => btn.style.display = '');
             manageCols.forEach(col => col.style.display = '');
             alert('เกิดข้อผิดพลาดในการสร้างรูปภาพ');
             console.error(err);
