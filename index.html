@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ระบบติดตามค่าใช้จ่าย</title>
-    <!-- Include html2canvas for exporting element to image -->
+    <title>ระบบติดตามค่าใช้จ่าย (Sync All)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -45,7 +44,6 @@
             font-size: 20px;
         }
 
-        /* Tabs styling for Mobile */
         .tabs {
             display: flex;
             border-bottom: 2px solid var(--border-color);
@@ -132,15 +130,9 @@
             opacity: 0.8;
         }
 
-        button.btn-danger {
-            background-color: var(--danger-color);
-        }
+        button.btn-danger { background-color: var(--danger-color); }
+        button.btn-success { background-color: #10b981; }
 
-        button.btn-success {
-            background-color: #10b981;
-        }
-
-        /* Mobile Responsive Table Wrapper */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -168,13 +160,8 @@
             color: #475569;
         }
 
-        td.text-right, th.text-right {
-            text-align: right;
-        }
-
-        td.text-center, th.text-center {
-            text-align: center;
-        }
+        td.text-right, th.text-right { text-align: right; }
+        td.text-center, th.text-center { text-align: center; }
 
         input[type="text"], input[type="number"] {
             width: 100%;
@@ -212,10 +199,6 @@
             border: 1px dashed var(--border-color);
         }
 
-        .add-row-form input {
-            width: 100%;
-        }
-
         .section-title {
             font-size: 15px;
             font-weight: 600;
@@ -238,21 +221,20 @@
 <div class="container">
     <h1>ระบบติดตามค่าใช้จ่าย</h1>
 
-    <!-- Tabs Navigation -->
     <div class="tabs">
         <div class="tab-buttons">
             <button class="tab-btn active" onclick="switchTab('main')">ค่าใช้จ่ายหลัก</button>
             <button class="tab-btn" onclick="switchTab('billing')">รายการเรียกเก็บ</button>
         </div>
         <div style="display: flex; gap: 6px; width: 100%;">
-            <button class="btn-success" onclick="syncWithGoogleSheet()" style="font-size: 13px; padding: 8px;">🔄 โหลดข้อมูลจาก Sheet</button>
+            <button class="btn-success" onclick="syncWithGoogleSheet()" style="font-size: 13px; padding: 8px;">🔄 โหลดข้อมูลล่าสุด</button>
             <div id="export-btn-container" style="display: none; flex: 1;">
                 <button class="btn-success" onclick="exportBillingToJpg()" style="font-size: 13px; padding: 8px;">📷 Export JPG</button>
             </div>
         </div>
     </div>
 
-    <!-- Tab 1: Main Expense -->
+    <!-- Tab 1 -->
     <div id="tab-main" class="tab-content active">
         <div class="summary-box">
             <div class="summary-item">ยอดรวมทั้งหมด (สุทธิ): <span id="net-total-amount">0.00</span> บาท</div>
@@ -276,9 +258,7 @@
                         <th style="min-width: 130px;">ข้อมูล</th>
                     </tr>
                 </thead>
-                <tbody id="expense-tbody">
-                    <!-- Data populated by JS -->
-                </tbody>
+                <tbody id="expense-tbody"></tbody>
             </table>
         </div>
 
@@ -293,17 +273,14 @@
         </div>
     </div>
 
-    <!-- Tab 2: Billing / Split Expense -->
+    <!-- Tab 2 -->
     <div id="tab-billing" class="tab-content">
         <div id="export-area">
             <div class="summary-box">
                 <div class="summary-item">ยอดรวมเรียกเก็บทั้งหมด: <span id="billing-total-amount">0.00</span> บาท</div>
             </div>
             
-            <!-- Category 1: Main Billing Items -->
             <div class="section-title">1. รายการเรียกเก็บ</div>
-            <p style="font-size: 12px; color: #64748b; margin-top: 0;">ดึงจากรายการหลัก (หารสอง) + รายการเพิ่มพิเศษ</p>
-
             <div class="table-responsive">
                 <table id="billing-main-table">
                     <thead>
@@ -313,9 +290,7 @@
                             <th class="text-right" style="color: #2563eb; width: 90px;">ยอดเก็บ</th>
                         </tr>
                     </thead>
-                    <tbody id="billing-main-tbody">
-                        <!-- Populated by JS -->
-                    </tbody>
+                    <tbody id="billing-main-tbody"></tbody>
                     <tfoot>
                         <tr>
                             <td colspan="2" style="font-weight: bold;">รวม</td>
@@ -331,7 +306,6 @@
                 <button onclick="addManualMainBillingItem()">เพิ่มรายการเรียกเก็บ</button>
             </div>
 
-            <!-- Category 2: Other Billing Items -->
             <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
                 <span>2. อื่นๆ (เพิ่มทีหลัง)</span>
                 <button onclick="clearSavedOtherNames()" style="background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 4px 8px; font-size: 11px; width: auto; border-radius: 4px;">ล้างประวัติคำ</button>
@@ -346,9 +320,7 @@
                             <th class="text-center manage-col" style="width: 40px;">ลบ</th>
                         </tr>
                     </thead>
-                    <tbody id="billing-other-tbody">
-                        <!-- Populated by JS -->
-                    </tbody>
+                    <tbody id="billing-other-tbody"></tbody>
                     <tfoot>
                         <tr>
                             <td>รวม</td>
@@ -368,61 +340,10 @@
             </div>
         </div>
     </div>
-
 </div>
 
 <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzYaBSXLXMJa9EZM38y4uKy_pwJjtEPX6PjW-5rLPOX6wpuDwhCnwdbZqdpNXyU4vRLhw/exec";
-
-    async function sendToGoogleSheet(payload) {
-        if (!WEB_APP_URL) return;
-        const statusEl = document.getElementById('sync-status');
-        try {
-            statusEl.innerText = "สถานะ: กำลังบันทึกลง Sheet...";
-            await fetch(WEB_APP_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-            statusEl.innerText = "สถานะ: ซิงค์กับ Sheet แล้ว";
-        } catch (error) {
-            console.error("Google Sheet Sync Error:", error);
-            statusEl.innerText = "สถานะ: บันทึกลง Sheet ไม่สำเร็จ";
-        }
-    }
-
-    async function syncWithGoogleSheet() {
-        if (!WEB_APP_URL) return;
-        const statusEl = document.getElementById('sync-status');
-        statusEl.innerText = "สถานะ: กำลังดึงข้อมูล...";
-        try {
-            let response = await fetch(WEB_APP_URL);
-            let result = await response.json();
-            
-            if (Array.isArray(result) && result.length > 0) {
-                result.forEach(row => {
-                    if (row.type === 'other_billing') {
-                        if (!otherBillingItems.some(item => item.name === row.name && item.price === row.price)) {
-                            otherBillingItems.push({ name: row.name, price: row.price });
-                        }
-                    } else if (row.type === 'manual_main') {
-                        if (!manualMainBillingItems.some(item => item.name === row.name && item.price === row.price)) {
-                            manualMainBillingItems.push({ name: row.name, price: row.price, currentInstallment: 0, totalInstallments: 0 });
-                        }
-                    }
-                });
-                saveToStorage();
-                renderTable();
-                statusEl.innerText = "สถานะ: อัปเดตข้อมูลสำเร็จ";
-            } else {
-                statusEl.innerText = "สถานะ: ไม่พบข้อมูลใหม่";
-            }
-        } catch (error) {
-            console.error("Fetch Error:", error);
-            statusEl.innerText = "สถานะ: ดึงข้อมูลไม่สำเร็จ";
-        }
-    }
 
     const defaultItems = [
         { name: "ส่วนกลาง", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
@@ -444,16 +365,70 @@
         { name: "น้ำกิน", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false }
     ];
 
-    let items = JSON.parse(localStorage.getItem('expense_items_v36')) || defaultItems;
-    let manualMainBillingItems = JSON.parse(localStorage.getItem('manual_main_billing_v36')) || [];
-    let otherBillingItems = JSON.parse(localStorage.getItem('other_billing_items_v36')) || [];
-    let savedOtherNames = JSON.parse(localStorage.getItem('saved_other_names_v36')) || ["ค่าห้อง", "ค่าปรับ", "ค่าส่วนกลางเพิ่มเติม", "ค่าอินเทอร์เน็ต"];
+    let items = JSON.parse(localStorage.getItem('expense_items_v37')) || defaultItems;
+    let manualMainBillingItems = JSON.parse(localStorage.getItem('manual_main_billing_v37')) || [];
+    let otherBillingItems = JSON.parse(localStorage.getItem('other_billing_items_v37')) || [];
+    let savedOtherNames = JSON.parse(localStorage.getItem('saved_other_names_v37')) || ["ค่าห้อง", "ค่าปรับ", "ค่าส่วนกลางเพิ่มเติม", "ค่าอินเทอร์เน็ต"];
+
+    // ฟังก์ชันซิงค์ข้อมูลทั้งหมดขึ้น Google Sheets ทุกครั้งที่มีการเปลี่ยนแปลง
+    async function syncAllToGoogleSheet() {
+        if (!WEB_APP_URL) return;
+        const statusEl = document.getElementById('sync-status');
+        const payload = {
+            items: items,
+            manualMain: manualMainBillingItems,
+            other: otherBillingItems,
+            names: savedOtherNames
+        };
+
+        try {
+            statusEl.innerText = "สถานะ: กำลังซิงค์ข้อมูล...";
+            await fetch(WEB_APP_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "SYNC_ALL", payload: payload })
+            });
+            statusEl.innerText = "สถานะ: ซิงค์ข้อมูลสำเร็จ";
+        } catch (error) {
+            console.error("Sync Error:", error);
+            statusEl.innerText = "สถานะ: ซิงค์ไม่สำเร็จ";
+        }
+    }
+
+    // ฟังก์ชันดึงข้อมูลทั้งหมดจาก Google Sheets มาอัปเดตหน้าจอ
+    async function syncWithGoogleSheet() {
+        if (!WEB_APP_URL) return;
+        const statusEl = document.getElementById('sync-status');
+        statusEl.innerText = "สถานะ: กำลังดึงข้อมูล...";
+        try {
+            let response = await fetch(WEB_APP_URL);
+            let result = await response.json();
+            
+            if (result && result.items && result.items.length > 0) {
+                items = result.items;
+                manualMainBillingItems = result.manualMain || [];
+                otherBillingItems = result.other || [];
+                savedOtherNames = result.names || savedOtherNames;
+                
+                saveToStorage();
+                renderSavedOtherNamesList();
+                renderTable();
+                statusEl.innerText = "สถานะ: อัปเดตข้อมูลล่าสุดแล้ว";
+            } else {
+                statusEl.innerText = "สถานะ: ยังไม่มีข้อมูลใน Sheet";
+            }
+        } catch (error) {
+            console.error("Fetch Error:", error);
+            statusEl.innerText = "สถานะ: ดึงข้อมูลไม่สำเร็จ";
+        }
+    }
 
     function saveToStorage() {
-        localStorage.setItem('expense_items_v36', JSON.stringify(items));
-        localStorage.setItem('manual_main_billing_v36', JSON.stringify(manualMainBillingItems));
-        localStorage.setItem('other_billing_items_v36', JSON.stringify(otherBillingItems));
-        localStorage.setItem('saved_other_names_v36', JSON.stringify(savedOtherNames));
+        localStorage.setItem('expense_items_v37', JSON.stringify(items));
+        localStorage.setItem('manual_main_billing_v37', JSON.stringify(manualMainBillingItems));
+        localStorage.setItem('other_billing_items_v37', JSON.stringify(otherBillingItems));
+        localStorage.setItem('saved_other_names_v37', JSON.stringify(savedOtherNames));
     }
 
     function renderSavedOtherNamesList() {
@@ -494,7 +469,6 @@
 
         let totalAmount = 0;
         let billingMainTotal = 0;
-
         let totalItemsCount = items.length;
         let paidItemsCount = 0;
 
@@ -508,143 +482,54 @@
                 billingMainTotal += halfPrice;
             }
 
-            if (item.paid) {
-                paidItemsCount++;
-            }
+            if (item.paid) paidItemsCount++;
 
             const tr = document.createElement('tr');
-
-            const tdName = document.createElement('td');
-            tdName.innerHTML = `<input type="text" value="${item.name}" onchange="updateName(${index}, this.value)">`;
-            tr.appendChild(tdName);
-
-            const tdPrice = document.createElement('td');
-            tdPrice.className = 'text-right';
-            tdPrice.innerHTML = `<input type="number" style="text-align: right;" value="${item.price || ''}" placeholder="0.00" onchange="updatePrice(${index}, this.value)">`;
-            tr.appendChild(tdPrice);
-
-            const tdInstConfig = document.createElement('td');
-            tdInstConfig.className = 'text-center';
-            if (item.totalInstallments > 0) {
-                tdInstConfig.innerHTML = `<span style="font-size: 11px;">งวด ${item.currentInstallment || 0}/${item.totalInstallments}</span><br><button style="padding: 2px; font-size: 10px; width: auto; margin-top: 2px;" onclick="editInstallment(${index})">ตั้งค่า</button>`;
-            } else {
-                tdInstConfig.innerHTML = `<button style="padding: 2px; font-size: 10px; width: auto;" onclick="setInstallment(${index})">ผ่อน</button>`;
-            }
-            tr.appendChild(tdInstConfig);
-
-            const tdIsBilling = document.createElement('td');
-            tdIsBilling.className = 'text-center';
-            const billingCheckbox = document.createElement('input');
-            billingCheckbox.type = 'checkbox';
-            billingCheckbox.checked = item.isBilling;
-            billingCheckbox.onchange = (e) => toggleBilling(index, e.target.checked);
-            tdIsBilling.appendChild(billingCheckbox);
-            tr.appendChild(tdIsBilling);
-
-            const tdStatus = document.createElement('td');
-            tdStatus.className = 'text-center';
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.checked = item.paid;
-            checkbox.onchange = (e) => togglePaid(index, e.target.checked);
-            tdStatus.appendChild(checkbox);
-            tr.appendChild(tdStatus);
-
-            const tdInfo = document.createElement('td');
-            tdInfo.innerHTML = item.info ? `<span class="badge">${item.info}</span>` : `<span style="color: #cbd5e1; font-size: 12px;">-</span>`;
-            
-            const deleteBtn = document.createElement('button');
-            deleteBtn.innerHTML = '&times;';
-            deleteBtn.style.cssText = 'float: right; background: transparent; color: #94a3b8; border: none; font-size: 16px; cursor: pointer; padding: 0 4px; width: auto;';
-            deleteBtn.onclick = () => deleteItem(index);
-            tdInfo.appendChild(deleteBtn);
-
-            tr.appendChild(tdInfo);
+            tr.innerHTML = `
+                <td><input type="text" value="${item.name}" onchange="updateName(${index}, this.value)"></td>
+                <td class="text-right"><input type="number" style="text-align: right;" value="${item.price || ''}" placeholder="0.00" onchange="updatePrice(${index}, this.value)"></td>
+                <td class="text-center">
+                    ${item.totalInstallments > 0 ? 
+                        `<span style="font-size: 11px;">งวด ${item.currentInstallment || 0}/${item.totalInstallments}</span><br><button style="padding: 2px; font-size: 10px; width: auto; margin-top: 2px;" onclick="editInstallment(${index})">ตั้งค่า</button>` : 
+                        `<button style="padding: 2px; font-size: 10px; width: auto;" onclick="setInstallment(${index})">ผ่อน</button>`}
+                </td>
+                <td class="text-center"><input type="checkbox" ${item.isBilling ? 'checked' : ''} onchange="toggleBilling(${index}, this.checked)"></td>
+                <td class="text-center"><input type="checkbox" ${item.paid ? 'checked' : ''} onchange="togglePaid(${index}, this.checked)"></td>
+                <td>
+                    ${item.info ? `<span class="badge">${item.info}</span>` : `<span style="color: #cbd5e1; font-size: 12px;">-</span>`}
+                    <button style="float: right; background: transparent; color: #94a3b8; border: none; font-size: 16px; cursor: pointer; padding: 0 4px; width: auto;" onclick="deleteItem(${index})">&times;</button>
+                </td>
+            `;
             tbody.appendChild(tr);
 
             if (item.isBilling) {
                 const bTr = document.createElement('tr');
-                
-                const bName = document.createElement('td');
-                bName.innerText = item.name;
-                bTr.appendChild(bName);
-
-                const bInst = document.createElement('td');
-                bInst.className = 'text-center';
-                if (item.totalInstallments > 0) {
-                    bInst.innerHTML = `<span style="font-size: 11px;">งวด ${item.currentInstallment || 0}/${item.totalInstallments}</span><br><button style="padding: 2px; font-size: 10px; width: auto; margin-top: 2px;" onclick="editInstallment(${index})">ตั้งค่า</button>`;
-                } else {
-                    bInst.innerHTML = `<button style="padding: 2px; font-size: 10px; width: auto;" onclick="setInstallment(${index})">ผ่อน</button>`;
-                }
-                bTr.appendChild(bInst);
-
-                const bHalfPrice = document.createElement('td');
-                bHalfPrice.className = 'text-right';
-                bHalfPrice.style.fontWeight = 'bold';
-                bHalfPrice.style.color = '#2563eb';
-                bHalfPrice.innerText = halfPrice.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                bTr.appendChild(bHalfPrice);
-
+                bTr.innerHTML = `
+                    <td>${item.name}</td>
+                    <td class="text-center">
+                        ${item.totalInstallments > 0 ? 
+                            `<span style="font-size: 11px;">งวด ${item.currentInstallment || 0}/${item.totalInstallments}</span><br><button style="padding: 2px; font-size: 10px; width: auto; margin-top: 2px;" onclick="editInstallment(${index})">ตั้งค่า</button>` : 
+                            `<button style="padding: 2px; font-size: 10px; width: auto;" onclick="setInstallment(${index})">ผ่อน</button>`}
+                    </td>
+                    <td class="text-right" style="font-weight: bold; color: #2563eb;">${halfPrice.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                `;
                 billingMainTbody.appendChild(bTr);
             }
         });
-
-        if (totalItemsCount > 0 && paidItemsCount === totalItemsCount) {
-            setTimeout(() => {
-                items = items.filter(item => !(item.totalInstallments > 0 && item.currentInstallment >= item.totalInstallments));
-                manualMainBillingItems = manualMainBillingItems.filter(mItem => !(mItem.totalInstallments > 0 && mItem.currentInstallment >= mItem.totalInstallments));
-
-                items.forEach(item => {
-                    item.paid = false;
-                    item.info = '';
-                    if (item.totalInstallments > 0 && (item.currentInstallment || 0) < item.totalInstallments) {
-                        item.currentInstallment = (item.currentInstallment || 0) + 1;
-                    }
-                });
-                
-                manualMainBillingItems.forEach(mItem => {
-                    if (mItem.totalInstallments > 0 && (mItem.currentInstallment || 0) < mItem.totalInstallments) {
-                        mItem.currentInstallment = (mItem.currentInstallment || 0) + 1;
-                    }
-                });
-                
-                saveToStorage();
-                renderTable();
-            }, 600);
-        }
 
         manualMainBillingItems.forEach((manualItem, index) => {
             const mPrice = parseFloat(manualItem.price) || 0;
             billingMainTotal += mPrice;
 
             const mTr = document.createElement('tr');
-
-            const mName = document.createElement('td');
-            mName.innerText = manualItem.name;
-            mTr.appendChild(mName);
-
-            const mInst = document.createElement('td');
-            mInst.className = 'text-center';
-            if (manualItem.totalInstallments > 0) {
-                mInst.innerHTML = `<span style="font-size: 11px;">งวด ${manualItem.currentInstallment || 0}/${manualItem.totalInstallments}</span><br><button style="padding: 2px; font-size: 10px; width: auto; margin-top: 2px;" onclick="editManualInstallment(${index})">ตั้งค่า</button>`;
-            } else {
-                mInst.innerHTML = `<button style="padding: 2px; font-size: 10px; width: auto;" onclick="setManualInstallment(${index})">ผ่อน</button>`;
-            }
-            mTr.appendChild(mInst);
-
-            const mPriceTd = document.createElement('td');
-            mPriceTd.className = 'text-right';
-            mPriceTd.style.fontWeight = 'bold';
-            mPriceTd.style.color = '#2563eb';
-            mPriceTd.innerText = mPrice.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-            const deleteManualBtn = document.createElement('button');
-            deleteManualBtn.innerHTML = '&times;';
-            deleteManualBtn.style.cssText = 'float: right; background: transparent; color: #ef4444; border: none; font-size: 16px; cursor: pointer; padding: 0 4px; width: auto;';
-            deleteManualBtn.onclick = () => deleteManualMainItem(index);
-            mPriceTd.appendChild(deleteManualBtn);
-
-            mTr.appendChild(mPriceTd);
+            mTr.innerHTML = `
+                <td>${manualItem.name}</td>
+                <td class="text-center">-</td>
+                <td class="text-right" style="font-weight: bold; color: #2563eb;">
+                    ${mPrice.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    <button style="float: right; background: transparent; color: #ef4444; border: none; font-size: 16px; cursor: pointer; padding: 0 4px; width: auto;" onclick="deleteManualMainItem(${index})">&times;</button>
+                </td>
+            `;
             billingMainTbody.appendChild(mTr);
         });
 
@@ -656,25 +541,11 @@
             billingOtherTotal += oPrice;
 
             const oTr = document.createElement('tr');
-
-            const oName = document.createElement('td');
-            oName.innerHTML = `<input type="text" value="${otherItem.name}" onchange="updateOtherName(${index}, this.value)">`;
-            oTr.appendChild(oName);
-
-            const oPriceTd = document.createElement('td');
-            oPriceTd.className = 'text-right';
-            oPriceTd.innerHTML = `<input type="number" style="text-align: right;" value="${otherItem.price || ''}" placeholder="0.00" onchange="updateOtherPrice(${index}, this.value)">`;
-            oTr.appendChild(oPriceTd);
-
-            const oDeleteTd = document.createElement('td');
-            oDeleteTd.className = 'text-center manage-col';
-            const deleteBtn = document.createElement('button');
-            deleteBtn.innerHTML = '&times;';
-            deleteBtn.style.cssText = 'background: transparent; color: #ef4444; border: none; font-size: 18px; cursor: pointer; padding: 0; width: auto;';
-            deleteBtn.onclick = () => deleteOtherItem(index);
-            oDeleteTd.appendChild(deleteBtn);
-            oTr.appendChild(oDeleteTd);
-
+            oTr.innerHTML = `
+                <td><input type="text" value="${otherItem.name}" onchange="updateOtherName(${index}, this.value)"></td>
+                <td class="text-right"><input type="number" style="text-align: right;" value="${otherItem.price || ''}" placeholder="0.00" onchange="updateOtherPrice(${index}, this.value)"></td>
+                <td class="text-center manage-col"><button style="background: transparent; color: #ef4444; border: none; font-size: 18px; cursor: pointer; padding: 0; width: auto;" onclick="deleteOtherItem(${index})">&times;</button></td>
+            `;
             billingOtherTbody.appendChild(oTr);
         });
 
@@ -687,82 +558,164 @@
         document.getElementById('billing-total-amount').innerText = grandBillingTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    // รองรับการ Export เป็น JPG บน WebView ของแอป Android (h2apk)
+    function updateName(index, value) { items[index].name = value; saveAndSync(); }
+    function updatePrice(index, value) { items[index].price = parseFloat(value) || 0; saveAndSync(); }
+    function toggleBilling(index, isChecked) { items[index].isBilling = isChecked; saveAndSync(); }
+    
+    function togglePaid(index, isChecked) {
+        const item = items[index];
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
+
+        if (isChecked) {
+            item.paid = true;
+            item.info = item.totalInstallments > 0 ? `จ่ายแล้ว งวดที่ ${item.currentInstallment}/${item.totalInstallments} (${dateStr})` : `จ่ายแล้ว (${dateStr})`;
+        } else {
+            item.paid = false;
+            item.info = '';
+        }
+        saveAndSync();
+    }
+
+    function setInstallment(index) {
+        const total = prompt("ระบุจำนวนงวดทั้งหมด (เดือน):", "10");
+        if (total && !isNaN(total) && parseInt(total) > 0) {
+            items[index].totalInstallments = parseInt(total);
+            items[index].currentInstallment = 1;
+            saveAndSync();
+        }
+    }
+
+    function editInstallment(index) {
+        const item = items[index];
+        const current = prompt("แก้ไขจำนวนงวดที่จ่ายแล้วปัจจุบัน:", item.currentInstallment || 1);
+        if (current !== null) {
+            const total = prompt("แก้ไขจำนวนงวดทั้งหมด:", item.totalInstallments);
+            if (total !== null) {
+                item.currentInstallment = parseInt(current) || 0;
+                item.totalInstallments = parseInt(total) || 0;
+                saveAndSync();
+            }
+        }
+    }
+
+    function deleteItem(index) { items.splice(index, 1); saveAndSync(); }
+    
+    function addNewItem() {
+        const name = document.getElementById('new-name').value.trim();
+        if (!name) return alert('กรุณากรอกชื่อรายการ');
+        const price = parseFloat(document.getElementById('new-price').value) || 0;
+        const totalInstallments = parseInt(document.getElementById('new-total-installments').value) || 0;
+        const isBilling = document.getElementById('new-is-billing').checked;
+
+        items.push({ name, price, paid: false, info: "", currentInstallment: totalInstallments > 0 ? 1 : 0, totalInstallments, isBilling });
+        document.getElementById('new-name').value = '';
+        document.getElementById('new-price').value = '';
+        document.getElementById('new-total-installments').value = '';
+        document.getElementById('new-is-billing').checked = false;
+        saveAndSync();
+    }
+
+    function addManualMainBillingItem() {
+        const name = document.getElementById('manual-main-name').value.trim();
+        if (!name) return alert('กรุณากรอกชื่อรายการเรียกเก็บ');
+        const price = parseFloat(document.getElementById('manual-main-price').value) || 0;
+
+        manualMainBillingItems.push({ name, price, currentInstallment: 0, totalInstallments: 0 });
+        document.getElementById('manual-main-name').value = '';
+        document.getElementById('manual-main-price').value = '';
+        saveAndSync();
+    }
+
+    function deleteManualMainItem(index) { manualMainBillingItems.splice(index, 1); saveAndSync(); }
+
+    function addOtherBillingItem() {
+        const inputEl = document.getElementById('other-name');
+        const name = inputEl.value.trim();
+        if (!name) return alert('กรุณาเลือกหรือพิมพ์ชื่อรายการ');
+        const price = parseFloat(document.getElementById('other-price').value) || 0;
+
+        otherBillingItems.push({ name, price });
+        if (!savedOtherNames.includes(name)) {
+            savedOtherNames.push(name);
+            renderSavedOtherNamesList();
+        }
+        inputEl.value = '';
+        document.getElementById('other-price').value = '';
+        saveAndSync();
+    }
+
+    function clearSavedOtherNames() {
+        if (confirm('คุณต้องการล้างประวัติคำใช่หรือไม่?')) {
+            savedOtherNames = [];
+            renderSavedOtherNamesList();
+            saveAndSync();
+        }
+    }
+
+    function updateOtherName(index, value) { otherBillingItems[index].name = value; saveAndSync(); }
+    function updateOtherPrice(index, value) { otherBillingItems[index].price = parseFloat(value) || 0; saveAndSync(); }
+    function deleteOtherItem(index) { otherBillingItems.splice(index, 1); saveAndSync(); }
+
+    function resetAllStatus() {
+        if (confirm('ต้องการรีเซ็ตสถานะการจ่ายทั้งหมดสำหรับเดือนใหม่ใช่หรือไม่?')) {
+            items.forEach(item => { item.paid = false; item.info = ''; });
+            saveAndSync();
+        }
+    }
+
+    function clearLocalStorage() {
+        if (confirm('ล้างข้อมูลทั้งหมดและคืนค่าเริ่มต้นใช่หรือไม่?')) {
+            localStorage.clear();
+            items = JSON.parse(JSON.stringify(defaultItems));
+            manualMainBillingItems = [];
+            otherBillingItems = [];
+            savedOtherNames = ["ค่าห้อง", "ค่าปรับ", "ค่าส่วนกลางเพิ่มเติม", "ค่าอินเทอร์เน็ต"];
+            renderSavedOtherNamesList();
+            saveAndSync();
+        }
+    }
+
+    function saveAndSync() {
+        saveToStorage();
+        renderTable();
+        syncAllToGoogleSheet();
+    }
+
+    // Export JPG
     function exportBillingToJpg() {
         const exportArea = document.getElementById('export-area');
-        
         const deleteButtons = exportArea.querySelectorAll('button');
         deleteButtons.forEach(btn => btn.style.display = 'none');
-        
         const manageCols = exportArea.querySelectorAll('.manage-col');
         manageCols.forEach(col => col.style.display = 'none');
 
-        const tableInputs = exportArea.querySelectorAll('table input');
-        const inputStates = [];
-        tableInputs.forEach(input => {
-            inputStates.push({ el: input, parent: input.parentNode, val: input.value });
-            const span = document.createElement('span');
-            span.innerText = input.value || '0';
-            span.style.padding = '6px';
-            span.style.display = 'inline-block';
-            if (input.type === 'number') span.style.width = '100%';
-            input.parentNode.replaceChild(span, input);
-        });
-
-        html2canvas(exportArea, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#ffffff'
-        }).then(canvas => {
-            inputStates.forEach(item => {
-                if (item.parent.contains(item.el)) return;
-                const spans = item.parent.querySelectorAll('span');
-                spans.forEach(s => s.remove());
-                item.parent.appendChild(item.el);
-            });
-
+        html2canvas(exportArea, { scale: 2, useCORS: true, backgroundColor: '#ffffff' }).then(canvas => {
             deleteButtons.forEach(btn => btn.style.display = '');
             manageCols.forEach(col => col.style.display = '');
-
             const dataURL = canvas.toDataURL('image/jpeg', 0.95);
 
             if (navigator.share && navigator.canShare) {
-                fetch(dataURL)
-                    .then(res => res.blob())
-                    .then(blob => {
-                        const file = new File([blob], "billing-summary.jpg", { type: "image/jpeg" });
-                        navigator.share({
-                            title: 'สรุปยอดเรียกเก็บ',
-                            text: 'รูปภาพสรุปยอดค่าใช้จ่าย',
-                            files: [file]
-                        }).catch(() => fallbackOpenImage(dataURL));
-                    }).catch(() => fallbackOpenImage(dataURL));
+                fetch(dataURL).then(res => res.blob()).then(blob => {
+                    const file = new File([blob], "billing-summary.jpg", { type: "image/jpeg" });
+                    navigator.share({ title: 'สรุปยอดเรียกเก็บ', text: 'รูปภาพสรุปยอดค่าใช้จ่าย', files: [file] }).catch(() => fallbackOpenImage(dataURL));
+                }).catch(() => fallbackOpenImage(dataURL));
             } else {
                 fallbackOpenImage(dataURL);
             }
-
             renderTable();
         }).catch(err => {
             renderTable();
             deleteButtons.forEach(btn => btn.style.display = '');
             manageCols.forEach(col => col.style.display = '');
             alert('เกิดข้อผิดพลาดในการสร้างรูปภาพ');
-            console.error(err);
         });
     }
 
     function fallbackOpenImage(dataURL) {
         const newWindow = window.open();
         if (newWindow) {
-            newWindow.document.write(`
-                <html>
-                    <head><title>บันทึกรูปภาพ</title></head>
-                    <body style="text-align:center; background:#333; margin-top:20px;">
-                        <p style="color:white; font-family:sans-serif;">กดค้างที่รูปภาพด้านล่างเพื่อบันทึกรูปลงเครื่อง</p>
-                        <img src="${dataURL}" style="max-width:100%; border-radius:8px;" />
-                    </body>
-                </html>
-            `);
+            newWindow.document.write(`<html><head><title>บันทึกรูปภาพ</title></head><body style="text-align:center; background:#333; margin-top:20px;"><p style="color:white; font-family:sans-serif;">กดค้างที่รูปภาพด้านล่างเพื่อบันทึกรูปลงเครื่อง</p><img src="${dataURL}" style="max-width:100%; border-radius:8px;" /></body></html>`);
         } else {
             const link = document.createElement('a');
             link.download = 'billing-summary.jpg';
@@ -771,252 +724,8 @@
         }
     }
 
-    function updateName(index, value) {
-        items[index].name = value;
-        saveToStorage();
-        renderTable();
-    }
-
-    function updatePrice(index, value) {
-        items[index].price = parseFloat(value) || 0;
-        saveToStorage();
-        renderTable();
-    }
-
-    function toggleBilling(index, isChecked) {
-        items[index].isBilling = isChecked;
-        saveToStorage();
-        renderTable();
-    }
-
-    function togglePaid(index, isChecked) {
-        const item = items[index];
-        const now = new Date();
-        const dateStr = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
-
-        if (isChecked) {
-            item.paid = true;
-            if (item.totalInstallments > 0) {
-                item.info = `จ่ายแล้ว งวดที่ ${item.currentInstallment}/${item.totalInstallments} (${dateStr})`;
-            } else {
-                item.info = `จ่ายแล้ว (${dateStr})`;
-            }
-        } else {
-            item.paid = false;
-            item.info = '';
-        }
-        saveToStorage();
-        renderTable();
-    }
-
-    function setInstallment(index) {
-        const total = prompt("ระบุจำนวนงวดทั้งหมด (เดือน):", "10");
-        if (total && !isNaN(total) && parseInt(total) > 0) {
-            items[index].totalInstallments = parseInt(total);
-            items[index].currentInstallment = 1;
-            saveToStorage();
-            renderTable();
-        }
-    }
-
-    function editInstallment(index) {
-        const item = items[index];
-        const current = prompt("แก้ไขจำนวนงวดที่จ่ายแล้วปัจจุบัน:", item.currentInstallment || 1);
-        if (current !== null && !isNaN(current)) {
-            const total = prompt("แก้ไขจำนวนงวดทั้งหมด:", item.totalInstallments);
-            if (total !== null && !isNaN(total)) {
-                item.currentInstallment = parseInt(current) || 0;
-                item.totalInstallments = parseInt(total) || 0;
-                if (item.totalInstallments === 0) item.currentInstallment = 0;
-                saveToStorage();
-                renderTable();
-            }
-        }
-    }
-
-    function setManualInstallment(index) {
-        const total = prompt("ระบุจำนวนงวดทั้งหมด (เดือน):", "10");
-        if (total && !isNaN(total) && parseInt(total) > 0) {
-            manualMainBillingItems[index].totalInstallments = parseInt(total);
-            manualMainBillingItems[index].currentInstallment = 1;
-            saveToStorage();
-            renderTable();
-        }
-    }
-
-    function editManualInstallment(index) {
-        const item = manualMainBillingItems[index];
-        const current = prompt("แก้ไขจำนวนงวดที่จ่ายแล้วปัจจุบัน:", item.currentInstallment || 1);
-        if (current !== null && !isNaN(current)) {
-            const total = prompt("แก้ไขจำนวนงวดทั้งหมด:", item.totalInstallments);
-            if (total !== null && !isNaN(total)) {
-                item.currentInstallment = parseInt(current) || 0;
-                item.totalInstallments = parseInt(total) || 0;
-                if (item.totalInstallments === 0) item.currentInstallment = 0;
-                saveToStorage();
-                renderTable();
-            }
-        }
-    }
-
-    function deleteItem(index) {
-        items.splice(index, 1);
-        saveToStorage();
-        renderTable();
-    }
-
-    function addNewItem() {
-        const nameInput = document.getElementById('new-name');
-        const priceInput = document.getElementById('new-price');
-        const instInput = document.getElementById('new-total-installments');
-        const billingInput = document.getElementById('new-is-billing');
-
-        const name = nameInput.value.trim();
-        if (!name) {
-            alert('กรุณากรอกชื่อรายการ');
-            return;
-        }
-
-        const price = parseFloat(priceInput.value) || 0;
-        const totalInstallments = parseInt(instInput.value) || 0;
-        const isBilling = billingInput.checked;
-
-        items.push({
-            name: name,
-            price: price,
-            paid: false,
-            info: "",
-            currentInstallment: totalInstallments > 0 ? 1 : 0,
-            totalInstallments: totalInstallments,
-            isBilling: isBilling,
-            billingPaid: false
-        });
-
-        nameInput.value = '';
-        priceInput.value = '';
-        instInput.value = '';
-        billingInput.checked = false;
-
-        saveToStorage();
-        renderTable();
-    }
-
-    function addManualMainBillingItem() {
-        const nameInput = document.getElementById('manual-main-name');
-        const priceInput = document.getElementById('manual-main-price');
-
-        const name = nameInput.value.trim();
-        if (!name) {
-            alert('กรุณากรอกชื่อรายการเรียกเก็บ');
-            return;
-        }
-
-        const price = parseFloat(priceInput.value) || 0;
-
-        manualMainBillingItems.push({
-            name: name,
-            price: price,
-            currentInstallment: 0,
-            totalInstallments: 0
-        });
-
-        sendToGoogleSheet({ type: "manual_main", name: name, price: price });
-
-        nameInput.value = '';
-        priceInput.value = '';
-
-        saveToStorage();
-        renderTable();
-    }
-
-    function deleteManualMainItem(index) {
-        manualMainBillingItems.splice(index, 1);
-        saveToStorage();
-        renderTable();
-    }
-
-    function addOtherBillingItem() {
-        const inputEl = document.getElementById('other-name');
-        const priceInput = document.getElementById('other-price');
-
-        const name = inputEl.value.trim();
-        if (!name) {
-            alert('กรุณาเลือกหรือพิมพ์ชื่อรายการ');
-            return;
-        }
-
-        const price = parseFloat(priceInput.value) || 0;
-
-        otherBillingItems.push({
-            name: name,
-            price: price
-        });
-
-        sendToGoogleSheet({ type: "other_billing", name: name, price: price });
-
-        if (!savedOtherNames.includes(name)) {
-            savedOtherNames.push(name);
-            renderSavedOtherNamesList();
-        }
-
-        inputEl.value = '';
-        priceInput.value = '';
-
-        saveToStorage();
-        renderTable();
-    }
-
-    function clearSavedOtherNames() {
-        if (confirm('คุณต้องการล้างประวัติคำใช่หรือไม่?')) {
-            savedOtherNames = [];
-            saveToStorage();
-            renderSavedOtherNamesList();
-        }
-    }
-
-    function updateOtherName(index, value) {
-        otherBillingItems[index].name = value;
-        saveToStorage();
-    }
-
-    function updateOtherPrice(index, value) {
-        otherBillingItems[index].price = parseFloat(value) || 0;
-        saveToStorage();
-        renderTable();
-    }
-
-    function deleteOtherItem(index) {
-        otherBillingItems.splice(index, 1);
-        saveToStorage();
-        renderTable();
-    }
-
-    function resetAllStatus() {
-        if (confirm('ต้องการรีเซ็ตสถานะการจ่ายทั้งหมดสำหรับเดือนใหม่ใช่หรือไม่?')) {
-            items.forEach(item => {
-                item.paid = false;
-                item.info = '';
-            });
-            saveToStorage();
-            renderTable();
-        }
-    }
-
-    function clearLocalStorage() {
-        if (confirm('คำเตือน: ล้างข้อมูลทั้งหมดและคืนค่าเริ่มต้นใช่หรือไม่?')) {
-            localStorage.removeItem('expense_items_v36');
-            localStorage.removeItem('manual_main_billing_v36');
-            localStorage.removeItem('other_billing_items_v36');
-            localStorage.removeItem('saved_other_names_v36');
-            items = JSON.parse(JSON.stringify(defaultItems));
-            manualMainBillingItems = [];
-            otherBillingItems = [];
-            savedOtherNames = ["ค่าห้อง", "ค่าปรับ", "ค่าส่วนกลางเพิ่มเติม", "ค่าอินเทอร์เน็ต"];
-            renderSavedOtherNamesList();
-            renderTable();
-        }
-    }
-
+    // โหลดข้อมูลอัตโนมัติเมื่อเปิดแอป
+    syncWithGoogleSheet();
     renderSavedOtherNamesList();
     renderTable();
 </script>
