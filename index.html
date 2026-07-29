@@ -687,6 +687,7 @@
         document.getElementById('billing-total-amount').innerText = grandBillingTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
+    // รองรับการ Export เป็น JPG บน WebView ของแอป Android (h2apk)
     function exportBillingToJpg() {
         const exportArea = document.getElementById('export-area');
         
@@ -723,18 +724,51 @@
             deleteButtons.forEach(btn => btn.style.display = '');
             manageCols.forEach(col => col.style.display = '');
 
-            const link = document.createElement('a');
-            link.download = 'billing-summary.jpg';
-            link.href = canvas.toDataURL('image/jpeg', 0.95);
-            link.click();
+            const dataURL = canvas.toDataURL('image/jpeg', 0.95);
+
+            if (navigator.share && navigator.canShare) {
+                fetch(dataURL)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const file = new File([blob], "billing-summary.jpg", { type: "image/jpeg" });
+                        navigator.share({
+                            title: 'สรุปยอดเรียกเก็บ',
+                            text: 'รูปภาพสรุปยอดค่าใช้จ่าย',
+                            files: [file]
+                        }).catch(() => fallbackOpenImage(dataURL));
+                    }).catch(() => fallbackOpenImage(dataURL));
+            } else {
+                fallbackOpenImage(dataURL);
+            }
+
             renderTable();
         }).catch(err => {
             renderTable();
             deleteButtons.forEach(btn => btn.style.display = '');
             manageCols.forEach(col => col.style.display = '');
-            alert('เกิดข้อผิดพลาดในการ Export รูปภาพ');
+            alert('เกิดข้อผิดพลาดในการสร้างรูปภาพ');
             console.error(err);
         });
+    }
+
+    function fallbackOpenImage(dataURL) {
+        const newWindow = window.open();
+        if (newWindow) {
+            newWindow.document.write(`
+                <html>
+                    <head><title>บันทึกรูปภาพ</title></head>
+                    <body style="text-align:center; background:#333; margin-top:20px;">
+                        <p style="color:white; font-family:sans-serif;">กดค้างที่รูปภาพด้านล่างเพื่อบันทึกรูปลงเครื่อง</p>
+                        <img src="${dataURL}" style="max-width:100%; border-radius:8px;" />
+                    </body>
+                </html>
+            `);
+        } else {
+            const link = document.createElement('a');
+            link.download = 'billing-summary.jpg';
+            link.href = dataURL;
+            link.click();
+        }
     }
 
     function updateName(index, value) {
