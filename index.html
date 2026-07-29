@@ -209,10 +209,12 @@
             padding-left: 6px;
         }
 
+        /* ขยายพื้นที่และจัดรูปแบบพื้นที่ Export ให้กว้างออกไปทางด้านขวาแบบ Desktop WebApp */
         #export-area {
             background-color: #ffffff;
-            padding: 10px;
+            padding: 20px;
             border-radius: 8px;
+            min-width: 750px; 
         }
 
         .version-footer {
@@ -283,20 +285,19 @@
 
     <!-- Tab 2 -->
     <div id="tab-billing" class="tab-content">
-        <!-- ย้าย #export-area ให้ครอบคลุมทั้งส่วนสรุป, ตารางที่ 1 และตารางที่ 2 เพื่อให้ Export เห็นทั้งหมด -->
-        <div id="export-area">
-            <div class="summary-box">
-                <div class="summary-item">ยอดรวมเรียกเก็บทั้งหมด: <span id="billing-total-amount">0.00</span> บาท</div>
-            </div>
-            
-            <div class="section-title">1. รายการเรียกเก็บ</div>
-            <div class="table-responsive">
-                <table id="billing-main-table">
+        <div class="table-responsive">
+            <div id="export-area">
+                <div class="summary-box">
+                    <div class="summary-item">ยอดรวมเรียกเก็บทั้งหมด: <span id="billing-total-amount">0.00</span> บาท</div>
+                </div>
+                
+                <div class="section-title">1. รายการเรียกเก็บ</div>
+                <table>
                     <thead>
                         <tr>
                             <th>รายการ</th>
-                            <th class="text-center" style="width: 70px;">งวด</th>
-                            <th class="text-right" style="color: #2563eb; width: 90px;">ยอดเก็บ</th>
+                            <th class="text-center" style="width: 100px;">งวด</th>
+                            <th class="text-right" style="color: #2563eb; width: 130px;">ยอดเก็บ</th>
                         </tr>
                     </thead>
                     <tbody id="billing-main-tbody"></tbody>
@@ -307,15 +308,13 @@
                         </tr>
                     </tfoot>
                 </table>
-            </div>
 
-            <div class="section-title" style="margin-top: 20px;">2. อื่นๆ (เพิ่มทีหลัง)</div>
-            <div class="table-responsive">
-                <table id="billing-other-table">
+                <div class="section-title" style="margin-top: 20px;">2. อื่นๆ (เพิ่มทีหลัง)</div>
+                <table>
                     <thead>
                         <tr>
                             <th>รายการ</th>
-                            <th class="text-right" style="width: 90px;">ยอดเก็บ</th>
+                            <th class="text-right" style="width: 130px;">ยอดเก็บ</th>
                             <th class="text-center manage-col" style="width: 40px;">ลบ</th>
                         </tr>
                     </thead>
@@ -331,7 +330,6 @@
             </div>
         </div>
 
-        <!-- ฟอร์มสำหรับเพิ่มข้อมูลจะอยู่ภายนอกพื้นที่ Export เพื่อไม่ให้ติดปุ่มหรือช่องกรอกตอนถ่ายรูป -->
         <div class="add-row-form" id="form-manual-main">
             <input type="text" id="manual-main-name" placeholder="ชื่อรายการเรียกเก็บ...">
             <input type="number" id="manual-main-price" placeholder="ยอดเรียกเก็บ">
@@ -353,36 +351,17 @@
     </div>
 
     <!-- แสดงเวอร์ชั่นของแอป -->
-    <div class="version-footer">Version 1.0.0</div>
+    <div class="version-footer">Version 1.0.1[span_2](start_span)[span_2](end_span)</div>
 </div>
 
 <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzYaBSXLXMJa9EZM38y4uKy_pwJjtEPX6PjW-5rLPOX6wpuDwhCnwdbZqdpNXyU4vRLhw/exec";
 
-    const defaultItems = [
-        { name: "ส่วนกลาง", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
-        { name: "fin mobile", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
-        { name: "AIS", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
-        { name: "Netflix", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
-        { name: "Youtube", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
-        { name: "ไฟ", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
-        { name: "น้ำ", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
-        { name: "Drive", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
-        { name: "ให้แม่", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
-        { name: "บัตร", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
-        { name: "กิน", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
-        { name: "Shopee Pay", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
-        { name: "อาหารแมว", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
-        { name: "ทรายแมว", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
-        { name: "Dime", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
-        { name: "จากนิด", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false },
-        { name: "น้ำกิน", price: 0, paid: false, info: "", currentInstallment: 0, totalInstallments: 0, isBilling: false }
-    ];
-
-    let items = JSON.parse(localStorage.getItem('expense_items_v37')) || defaultItems;
-    let manualMainBillingItems = JSON.parse(localStorage.getItem('manual_main_billing_v37')) || [];
-    let otherBillingItems = JSON.parse(localStorage.getItem('other_billing_items_v37')) || [];
-    let savedOtherNames = JSON.parse(localStorage.getItem('saved_other_names_v37')) || ["ค่าห้อง", "ค่าปรับ", "ค่าส่วนกลางเพิ่มเติม", "ค่าอินเทอร์เน็ต"];
+    // ลบ defaultItems ออก ให้เริ่มต้นด้วยค่าว่างเปล่า
+    let items = JSON.parse(localStorage.getItem('expense_items_v38')) || [];
+    let manualMainBillingItems = JSON.parse(localStorage.getItem('manual_main_billing_v38')) || [];
+    let otherBillingItems = JSON.parse(localStorage.getItem('other_billing_items_v38')) || [];
+    let savedOtherNames = JSON.parse(localStorage.getItem('saved_other_names_v38')) || ["ค่าห้อง", "ค่าปรับ", "ค่าส่วนกลางเพิ่มเติม", "ค่าอินเทอร์เน็ต"];
 
     async function syncAllToGoogleSheet() {
         if (!WEB_APP_URL) return;
@@ -417,7 +396,7 @@
             let response = await fetch(WEB_APP_URL);
             let result = await response.json();
             
-            if (result && result.items && result.items.length > 0) {
+            if (result && result.items) {
                 items = result.items;
                 manualMainBillingItems = result.manualMain || [];
                 otherBillingItems = result.other || [];
@@ -437,10 +416,10 @@
     }
 
     function saveToStorage() {
-        localStorage.setItem('expense_items_v37', JSON.stringify(items));
-        localStorage.setItem('manual_main_billing_v37', JSON.stringify(manualMainBillingItems));
-        localStorage.setItem('other_billing_items_v37', JSON.stringify(otherBillingItems));
-        localStorage.setItem('saved_other_names_v37', JSON.stringify(savedOtherNames));
+        localStorage.setItem('expense_items_v38', JSON.stringify(items));
+        localStorage.setItem('manual_main_billing_v38', JSON.stringify(manualMainBillingItems));
+        localStorage.setItem('other_billing_items_v38', JSON.stringify(otherBillingItems));
+        localStorage.setItem('saved_other_names_v38', JSON.stringify(savedOtherNames));
     }
 
     function renderSavedOtherNamesList() {
@@ -676,7 +655,7 @@
     function clearLocalStorage() {
         if (confirm('ล้างข้อมูลทั้งหมดและคืนค่าเริ่มต้นใช่หรือไม่?')) {
             localStorage.clear();
-            items = JSON.parse(JSON.stringify(defaultItems));
+            items = [];
             manualMainBillingItems = [];
             otherBillingItems = [];
             savedOtherNames = ["ค่าห้อง", "ค่าปรับ", "ค่าส่วนกลางเพิ่มเติม", "ค่าอินเทอร์เน็ต"];
@@ -691,13 +670,12 @@
         syncAllToGoogleSheet();
     }
 
-    // ฟังก์ชัน Export JPG เต็มหน้าเนื้อหาทั้งหมด (รวมสรุป, ตารางที่ 1 และตารางที่ 2 ครบถ้วน)
+    // ฟังก์ชัน Export JPG จัดวางให้กว้างเต็มรูปแบบเหมือน Desktop WebApp
     function exportBillingToJpg() {
         const exportArea = document.getElementById('export-area');
         const manageCols = exportArea.querySelectorAll('.manage-col');
         manageCols.forEach(col => col.style.display = 'none');
 
-        // แปลง input ในตารางอื่นๆ ให้เป็นข้อความธรรมดาชั่วคราวเพื่อให้ภาพออกมาสวยงาม
         const tableInputs = exportArea.querySelectorAll('table input');
         const inputStates = [];
         tableInputs.forEach(input => {
@@ -731,7 +709,7 @@
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = 'billing-summary-full.jpg';
+                link.download = 'billing-summary-desktop-style.jpg';
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
