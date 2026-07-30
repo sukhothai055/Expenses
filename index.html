@@ -260,9 +260,9 @@
                     <tr>
                         <th style="min-width: 110px;">รายการ</th>
                         <th style="min-width: 80px;" class="text-right">ราคา</th>
-                        <th style="min-width: 90px;" class="text-center">ผ่อนจ่าย</th>
-                        <th style="min-width: 60px;" class="text-center">เก็บ</th>
                         <th style="min-width: 60px;" class="text-center">จ่าย</th>
+                        <th style="min-width: 60px;" class="text-center">เก็บ</th>
+                        <th style="min-width: 90px;" class="text-center">ผ่อน</th>
                         <th style="min-width: 130px;">ข้อมูล</th>
                     </tr>
                 </thead>
@@ -350,16 +350,16 @@
     </div>
 
     <!-- แสดงเวอร์ชั่นของแอป -->
-    <div class="version-footer">Version 1.0.4</div>
+    <div class="version-footer">Version 1.0.5</div>
 </div>
 
 <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzsVA4prbMQtI2z4C78DBvsHe-mIHRTpPkVql-lEsKOczFhYXYUn7NM7rYPLs25oAPn4A/exec";
 
-    let items = JSON.parse(localStorage.getItem('expense_items_v41')) || [];
-    let manualMainBillingItems = JSON.parse(localStorage.getItem('manual_main_billing_v41')) || [];
-    let otherBillingItems = JSON.parse(localStorage.getItem('other_billing_items_v41')) || [];
-    let savedOtherNames = JSON.parse(localStorage.getItem('saved_other_names_v41')) || ["ค่าห้อง", "ค่าปรับ", "ค่าส่วนกลางเพิ่มเติม", "ค่าอินเทอร์เน็ต"];
+    let items = JSON.parse(localStorage.getItem('expense_items_v42')) || [];
+    let manualMainBillingItems = JSON.parse(localStorage.getItem('manual_main_billing_v42')) || [];
+    let otherBillingItems = JSON.parse(localStorage.getItem('other_billing_items_v42')) || [];
+    let savedOtherNames = JSON.parse(localStorage.getItem('saved_other_names_v42')) || ["ค่าห้อง", "ค่าปรับ", "ค่าส่วนกลางเพิ่มเติม", "ค่าอินเทอร์เน็ต"];
 
     async function syncAllToGoogleSheet() {
         if (!WEB_APP_URL) return;
@@ -414,10 +414,10 @@
     }
 
     function saveToStorage() {
-        localStorage.setItem('expense_items_v41', JSON.stringify(items));
-        localStorage.setItem('manual_main_billing_v41', JSON.stringify(manualMainBillingItems));
-        localStorage.setItem('other_billing_items_v41', JSON.stringify(otherBillingItems));
-        localStorage.setItem('saved_other_names_v41', JSON.stringify(savedOtherNames));
+        localStorage.setItem('expense_items_v42', JSON.stringify(items));
+        localStorage.setItem('manual_main_billing_v42', JSON.stringify(manualMainBillingItems));
+        localStorage.setItem('other_billing_items_v42', JSON.stringify(otherBillingItems));
+        localStorage.setItem('saved_other_names_v42', JSON.stringify(savedOtherNames));
     }
 
     function renderSavedOtherNamesList() {
@@ -459,7 +459,6 @@
         let totalAmount = 0;
         let billingMainTotal = 0;
 
-        // ตรวจสอบและลบรายการที่ผ่อนครบกำหนดแล้วออกอัตโนมัติ
         items = items.filter(item => {
             if (item.totalInstallments > 0 && (item.currentInstallment || 0) > item.totalInstallments) {
                 return false;
@@ -485,16 +484,17 @@
             }
 
             const tr = document.createElement('tr');
+            // เรียงลำดับคอลัมน์ใหม่ตามต้องการ: รายการ | ราคา | จ่าย | เก็บ | ผ่อน | ข้อมูล
             tr.innerHTML = `
                 <td><input type="text" value="${item.name}" onchange="updateName(${index}, this.value)"></td>
                 <td class="text-right"><input type="number" style="text-align: right;" value="${item.price || ''}" placeholder="0.00" onchange="updatePrice(${index}, this.value)"></td>
+                <td class="text-center"><input type="checkbox" ${item.paid ? 'checked' : ''} onchange="togglePaid(${index}, this.checked)"></td>
+                <td class="text-center"><input type="checkbox" ${item.isBilling ? 'checked' : ''} onchange="toggleBilling(${index}, this.checked)"></td>
                 <td class="text-center">
                     ${item.totalInstallments > 0 ? 
                         `<span style="font-size: 11px;">งวด ${item.currentInstallment || 0}/${item.totalInstallments}</span><br><button style="padding: 2px; font-size: 10px; width: auto; margin-top: 2px;" onclick="editInstallment(${index})">ตั้งค่า</button>` : 
                         `<button style="padding: 2px; font-size: 10px; width: auto;" onclick="setInstallment(${index})">ผ่อน</button>`}
                 </td>
-                <td class="text-center"><input type="checkbox" ${item.isBilling ? 'checked' : ''} onchange="toggleBilling(${index}, this.checked)"></td>
-                <td class="text-center"><input type="checkbox" ${item.paid ? 'checked' : ''} onchange="togglePaid(${index}, this.checked)"></td>
                 <td>
                     ${item.info ? `<span class="badge">${item.info}</span>` : `<span style="color: #cbd5e1; font-size: 12px;">-</span>`}
                     <button style="float: right; background: transparent; color: #94a3b8; border: none; font-size: 16px; cursor: pointer; padding: 0 4px; width: auto;" onclick="deleteItem(${index})">&times;</button>
@@ -695,7 +695,6 @@
     function updateOtherPrice(index, value) { otherBillingItems[index].price = parseFloat(value) || 0; saveAndSync(); }
     function deleteOtherItem(index) { otherBillingItems.splice(index, 1); saveAndSync(); }
 
-    // รีเซ็ตเดือนใหม่: รีเซ็ตสถานะจ่าย และเพิ่มงวดผ่อนจ่าย +1 อัตโนมัติ พร้อมลบรายการที่ผ่อนครบแล้ว
     function resetAllStatus() {
         if (confirm('ต้องการรีเซ็ตสถานะการจ่ายและเริ่มเดือนใหม่ใช่หรือไม่? (งวดผ่อนจะถูกบวกเพิ่ม +1)')) {
             items.forEach(item => {
