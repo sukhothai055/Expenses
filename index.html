@@ -209,7 +209,6 @@
             padding-left: 6px;
         }
 
-        /* ขยายพื้นที่และจัดรูปแบบพื้นที่ Export ให้กว้างออกไปทางด้านขวาแบบ Desktop WebApp */
         #export-area {
             background-color: #ffffff;
             padding: 20px;
@@ -332,7 +331,8 @@
 
         <div class="add-row-form" id="form-manual-main">
             <input type="text" id="manual-main-name" placeholder="ชื่อรายการเรียกเก็บ...">
-            <input type="number" id="manual-main-price" placeholder="ยอดเรียกเก็บ">
+            <input type="number" id="manual-main-price" placeholder="ราคารวมทั้งหมด">
+            <input type="number" id="manual-main-installments" placeholder="จำนวนงวด (ถ้ามี)">
             <button onclick="addManualMainBillingItem()">เพิ่มรายการเรียกเก็บ</button>
         </div>
 
@@ -351,17 +351,16 @@
     </div>
 
     <!-- แสดงเวอร์ชั่นของแอป -->
-    <div class="version-footer">Version 1.0.1[span_2](start_span)[span_2](end_span)</div>
+    <div class="version-footer">Version 1.0.2</div>
 </div>
 
 <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzYaBSXLXMJa9EZM38y4uKy_pwJjtEPX6PjW-5rLPOX6wpuDwhCnwdbZqdpNXyU4vRLhw/exec";
 
-    // ลบ defaultItems ออก ให้เริ่มต้นด้วยค่าว่างเปล่า
-    let items = JSON.parse(localStorage.getItem('expense_items_v38')) || [];
-    let manualMainBillingItems = JSON.parse(localStorage.getItem('manual_main_billing_v38')) || [];
-    let otherBillingItems = JSON.parse(localStorage.getItem('other_billing_items_v38')) || [];
-    let savedOtherNames = JSON.parse(localStorage.getItem('saved_other_names_v38')) || ["ค่าห้อง", "ค่าปรับ", "ค่าส่วนกลางเพิ่มเติม", "ค่าอินเทอร์เน็ต"];
+    let items = JSON.parse(localStorage.getItem('expense_items_v39')) || [];
+    let manualMainBillingItems = JSON.parse(localStorage.getItem('manual_main_billing_v39')) || [];
+    let otherBillingItems = JSON.parse(localStorage.getItem('other_billing_items_v39')) || [];
+    let savedOtherNames = JSON.parse(localStorage.getItem('saved_other_names_v39')) || ["ค่าห้อง", "ค่าปรับ", "ค่าส่วนกลางเพิ่มเติม", "ค่าอินเทอร์เน็ต"];
 
     async function syncAllToGoogleSheet() {
         if (!WEB_APP_URL) return;
@@ -416,10 +415,10 @@
     }
 
     function saveToStorage() {
-        localStorage.setItem('expense_items_v38', JSON.stringify(items));
-        localStorage.setItem('manual_main_billing_v38', JSON.stringify(manualMainBillingItems));
-        localStorage.setItem('other_billing_items_v38', JSON.stringify(otherBillingItems));
-        localStorage.setItem('saved_other_names_v38', JSON.stringify(savedOtherNames));
+        localStorage.setItem('expense_items_v39', JSON.stringify(items));
+        localStorage.setItem('manual_main_billing_v39', JSON.stringify(manualMainBillingItems));
+        localStorage.setItem('other_billing_items_v39', JSON.stringify(otherBillingItems));
+        localStorage.setItem('saved_other_names_v39', JSON.stringify(savedOtherNames));
     }
 
     function renderSavedOtherNamesList() {
@@ -508,16 +507,30 @@
             }
         });
 
+        // เรนเดอร์รายการเรียกเก็บเพิ่มพิเศษ (รองรับระบบผ่อนจ่าย: ราคาเต็มหารด้วยจำนวนงวด)
         manualMainBillingItems.forEach((manualItem, index) => {
-            const mPrice = parseFloat(manualItem.price) || 0;
-            billingMainTotal += mPrice;
+            const totalPrice = parseFloat(manualItem.price) || 0;
+            const totalInst = parseInt(manualItem.totalInstallments) || 0;
+            
+            let finalManualPrice = totalPrice;
+            if (totalInst > 0) {
+                finalManualPrice = totalPrice / totalInst; // ราคาเต็มหารด้วยจำนวนงวด
+            }
+            billingMainTotal += finalManualPrice;
 
             const mTr = document.createElement('tr');
             mTr.innerHTML = `
-                <td>${manualItem.name}</td>
-                <td class="text-center">-</td>
+                <td>
+                    ${manualItem.name}
+                    <button style="float: right; background: transparent; color: #ef4444; border: none; font-size: 16px; cursor: pointer; padding: 0 4px; width: auto;" onclick="deleteManualMainItem(${index})">&times;</button>
+                </td>
+                <td class="text-center">
+                    ${totalInst > 0 ? 
+                        `<span style="font-size: 11px;">งวด ${manualItem.currentInstallment || 1}/${totalInst}</span><br><button style="padding: 2px; font-size: 10px; width: auto; margin-top: 2px;" onclick="editManualInstallment(${index})">ตั้งค่า</button>` : 
+                        `<button style="padding: 2px; font-size: 10px; width: auto;" onclick="setManualInstallment(${index})">ผ่อน</button>`}
+                </td>
                 <td class="text-right" style="font-weight: bold; color: #2563eb;">
-                    ${mPrice.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    ${finalManualPrice.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </td>
             `;
             billingMainTbody.appendChild(mTr);
@@ -589,6 +602,28 @@
         }
     }
 
+    function setManualInstallment(index) {
+        const total = prompt("ระบุจำนวนงวดทั้งหมด (เดือน):", "10");
+        if (total && !isNaN(total) && parseInt(total) > 0) {
+            manualMainBillingItems[index].totalInstallments = parseInt(total);
+            manualMainBillingItems[index].currentInstallment = 1;
+            saveAndSync();
+        }
+    }
+
+    function editManualInstallment(index) {
+        const item = manualMainBillingItems[index];
+        const current = prompt("แก้ไขจำนวนงวดที่จ่ายแล้วปัจจุบัน:", item.currentInstallment || 1);
+        if (current !== null) {
+            const total = prompt("แก้ไขจำนวนงวดทั้งหมด:", item.totalInstallments);
+            if (total !== null) {
+                item.currentInstallment = parseInt(current) || 0;
+                item.totalInstallments = parseInt(total) || 0;
+                saveAndSync();
+            }
+        }
+    }
+
     function deleteItem(index) { items.splice(index, 1); saveAndSync(); }
     
     function addNewItem() {
@@ -610,12 +645,22 @@
         const name = document.getElementById('manual-main-name').value.trim();
         if (!name) return alert('กรุณากรอกชื่อรายการเรียกเก็บ');
         const price = parseFloat(document.getElementById('manual-main-price').value) || 0;
+        const totalInstallments = parseInt(document.getElementById('manual-main-installments').value) || 0;
 
-        manualMainBillingItems.push({ name, price, currentInstallment: 0, totalInstallments: 0 });
+        manualMainBillingItems.push({ 
+            name, 
+            price, 
+            currentInstallment: totalInstallments > 0 ? 1 : 0, 
+            totalInstallments 
+        });
+
         document.getElementById('manual-main-name').value = '';
         document.getElementById('manual-main-price').value = '';
+        document.getElementById('manual-main-installments').value = '';
         saveAndSync();
     }
+
+    function deleteManualMainItem(index) { manualMainBillingItems.splice(index, 1); saveAndSync(); }
 
     function addOtherBillingItem() {
         const inputEl = document.getElementById('other-name');
@@ -670,7 +715,6 @@
         syncAllToGoogleSheet();
     }
 
-    // ฟังก์ชัน Export JPG จัดวางให้กว้างเต็มรูปแบบเหมือน Desktop WebApp
     function exportBillingToJpg() {
         const exportArea = document.getElementById('export-area');
         const manageCols = exportArea.querySelectorAll('.manage-col');
@@ -725,7 +769,6 @@
         });
     }
 
-    // โหลดข้อมูลอัตโนมัติเมื่อเปิดแอป
     syncWithGoogleSheet();
     renderSavedOtherNamesList();
     renderTable();
