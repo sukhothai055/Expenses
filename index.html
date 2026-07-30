@@ -252,7 +252,6 @@
 
         <div class="controls">
             <button onclick="resetAllStatus()">รีเซ็ตสถานะทั้งหมด (เดือนใหม่)</button>
-            <button class="btn-danger" onclick="clearLocalStorage()">ล้างข้อมูลทั้งหมด</button>
         </div>
 
         <div class="table-responsive">
@@ -351,16 +350,16 @@
     </div>
 
     <!-- แสดงเวอร์ชั่นของแอป -->
-    <div class="version-footer">Version 1.0.3</div>
+    <div class="version-footer">Version 1.0.4</div>
 </div>
 
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzYaBSXLXMJa9EZM38y4uKy_pwJjtEPX6PjW-5rLPOX6wpuDwhCnwdbZqdpNXyU4vRLhw/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzsVA4prbMQtI2z4C78DBvsHe-mIHRTpPkVql-lEsKOczFhYXYUn7NM7rYPLs25oAPn4A/exec";
 
-    let items = JSON.parse(localStorage.getItem('expense_items_v40')) || [];
-    let manualMainBillingItems = JSON.parse(localStorage.getItem('manual_main_billing_v40')) || [];
-    let otherBillingItems = JSON.parse(localStorage.getItem('other_billing_items_v40')) || [];
-    let savedOtherNames = JSON.parse(localStorage.getItem('saved_other_names_v40')) || ["ค่าห้อง", "ค่าปรับ", "ค่าส่วนกลางเพิ่มเติม", "ค่าอินเทอร์เน็ต"];
+    let items = JSON.parse(localStorage.getItem('expense_items_v41')) || [];
+    let manualMainBillingItems = JSON.parse(localStorage.getItem('manual_main_billing_v41')) || [];
+    let otherBillingItems = JSON.parse(localStorage.getItem('other_billing_items_v41')) || [];
+    let savedOtherNames = JSON.parse(localStorage.getItem('saved_other_names_v41')) || ["ค่าห้อง", "ค่าปรับ", "ค่าส่วนกลางเพิ่มเติม", "ค่าอินเทอร์เน็ต"];
 
     async function syncAllToGoogleSheet() {
         if (!WEB_APP_URL) return;
@@ -415,10 +414,10 @@
     }
 
     function saveToStorage() {
-        localStorage.setItem('expense_items_v40', JSON.stringify(items));
-        localStorage.setItem('manual_main_billing_v40', JSON.stringify(manualMainBillingItems));
-        localStorage.setItem('other_billing_items_v40', JSON.stringify(otherBillingItems));
-        localStorage.setItem('saved_other_names_v40', JSON.stringify(savedOtherNames));
+        localStorage.setItem('expense_items_v41', JSON.stringify(items));
+        localStorage.setItem('manual_main_billing_v41', JSON.stringify(manualMainBillingItems));
+        localStorage.setItem('other_billing_items_v41', JSON.stringify(otherBillingItems));
+        localStorage.setItem('saved_other_names_v41', JSON.stringify(savedOtherNames));
     }
 
     function renderSavedOtherNamesList() {
@@ -459,8 +458,21 @@
 
         let totalAmount = 0;
         let billingMainTotal = 0;
-        let totalItemsCount = items.length;
-        let paidItemsCount = 0;
+
+        // ตรวจสอบและลบรายการที่ผ่อนครบกำหนดแล้วออกอัตโนมัติ
+        items = items.filter(item => {
+            if (item.totalInstallments > 0 && (item.currentInstallment || 0) > item.totalInstallments) {
+                return false;
+            }
+            return true;
+        });
+
+        manualMainBillingItems = manualMainBillingItems.filter(mItem => {
+            if (mItem.totalInstallments > 0 && (mItem.currentInstallment || 0) > mItem.totalInstallments) {
+                return false;
+            }
+            return true;
+        });
 
         items.forEach((item, index) => {
             const price = parseFloat(item.price) || 0;
@@ -471,8 +483,6 @@
                 halfPrice = price / 2;
                 billingMainTotal += halfPrice;
             }
-
-            if (item.paid) paidItemsCount++;
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -507,7 +517,6 @@
             }
         });
 
-        // เรนเดอร์รายการเรียกเก็บเพิ่มพิเศษ (ใช้ราคาเต็มโดยไม่หารงวด)
         manualMainBillingItems.forEach((manualItem, index) => {
             const totalPrice = parseFloat(manualItem.price) || 0;
             const totalInst = parseInt(manualItem.totalInstallments) || 0;
@@ -686,21 +695,23 @@
     function updateOtherPrice(index, value) { otherBillingItems[index].price = parseFloat(value) || 0; saveAndSync(); }
     function deleteOtherItem(index) { otherBillingItems.splice(index, 1); saveAndSync(); }
 
+    // รีเซ็ตเดือนใหม่: รีเซ็ตสถานะจ่าย และเพิ่มงวดผ่อนจ่าย +1 อัตโนมัติ พร้อมลบรายการที่ผ่อนครบแล้ว
     function resetAllStatus() {
-        if (confirm('ต้องการรีเซ็ตสถานะการจ่ายทั้งหมดสำหรับเดือนใหม่ใช่หรือไม่?')) {
-            items.forEach(item => { item.paid = false; item.info = ''; });
-            saveAndSync();
-        }
-    }
+        if (confirm('ต้องการรีเซ็ตสถานะการจ่ายและเริ่มเดือนใหม่ใช่หรือไม่? (งวดผ่อนจะถูกบวกเพิ่ม +1)')) {
+            items.forEach(item => {
+                item.paid = false;
+                item.info = '';
+                if (item.totalInstallments > 0) {
+                    item.currentInstallment = (item.currentInstallment || 0) + 1;
+                }
+            });
 
-    function clearLocalStorage() {
-        if (confirm('ล้างข้อมูลทั้งหมดและคืนค่าเริ่มต้นใช่หรือไม่?')) {
-            localStorage.clear();
-            items = [];
-            manualMainBillingItems = [];
-            otherBillingItems = [];
-            savedOtherNames = ["ค่าห้อง", "ค่าปรับ", "ค่าส่วนกลางเพิ่มเติม", "ค่าอินเทอร์เน็ต"];
-            renderSavedOtherNamesList();
+            manualMainBillingItems.forEach(mItem => {
+                if (mItem.totalInstallments > 0) {
+                    mItem.currentInstallment = (mItem.currentInstallment || 0) + 1;
+                }
+            });
+
             saveAndSync();
         }
     }
